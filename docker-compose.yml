@@ -1,0 +1,107 @@
+version: '3.8'
+
+# ============================================================================
+# LLM Agentic AI MVP - Docker Compose Configuration
+# ============================================================================
+# This file sets up Oracle 23c Free with AI Vector Search capabilities
+# ============================================================================
+
+services:
+
+  # Oracle Database 23c Free (AI Vector Search enabled)
+  oracle-23c:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: oracle-23c-ai
+    hostname: oracle-db
+    ports:
+      - "1521:1521"      # Oracle listener
+      - "5500:5500"      # Enterprise Manager Express
+    environment:
+      # Oracle configuration
+      ORACLE_PWD: Oracle123!
+      ORACLE_CHARACTERSET: AL32UTF8
+      ORACLE_EDITION: free
+      # Enable pluggable database
+      ORACLE_PDB: FREEPDB1
+      # Memory settings (adjust based on your system)
+      ORACLE_SGA_TARGET: 2G
+      ORACLE_PGA_TARGET: 1G
+    volumes:
+      # Persist Oracle data
+      - oracle-data:/opt/oracle/oradata
+      # Initialization scripts (will create user and vector tables)
+      - ./docker/oracle/init:/opt/oracle/scripts/startup
+      # Backup location
+      - ./docker/oracle/backup:/opt/oracle/backup
+    healthcheck:
+      test: ["CMD", "sqlplus", "-L", "sys/Oracle123!@//localhost:1521/FREEPDB1 as sysdba", "@/opt/oracle/healthcheck.sql"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - ai-network
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+volumes:
+  # Oracle data persistence
+  oracle-data:
+    driver: local
+
+networks:
+  # Network for AI services
+  ai-network:
+    driver: bridge
+    name: ai-mvp-network
+
+# ============================================================================
+# USAGE INSTRUCTIONS
+# ============================================================================
+#
+# 1. Start Oracle 23c:
+#    docker-compose up -d
+#
+# 2. Check logs:
+#    docker-compose logs -f oracle-23c
+#
+# 3. Wait for healthy status (takes 2-5 minutes first time):
+#    docker-compose ps
+#
+# 4. Connect to database:
+#    Host: localhost
+#    Port: 1521
+#    Service: FREEPDB1
+#    User: ai_user
+#    Password: ai_password_2024
+#
+# 5. Access Enterprise Manager Express:
+#    https://localhost:5500/em
+#    User: sys as sysdba
+#    Password: Oracle123!
+#
+# 6. Stop services:
+#    docker-compose down
+#
+# 7. Stop and remove volumes (CAUTION: deletes all data):
+#    docker-compose down -v
+#
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# - Oracle 23c Free includes AI Vector Search built-in
+# - First startup takes 2-5 minutes (downloads ~4GB image)
+# - Subsequent startups take ~30 seconds
+# - Data persists in Docker volume 'oracle-data'
+# - Initialization scripts in ./docker/oracle/init run on first startup
+# - Default sys password: Oracle123!
+# - Application user: ai_user / ai_password_2024
+#
+# ============================================================================
