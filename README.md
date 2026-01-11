@@ -27,14 +27,14 @@ Think of an LLM as a highly educated assistant who has read millions of books an
 - Analyze sentiment
 
 ### Examples:
-- **Anthropic Claude** (what we're using) - Claude 3.5 Sonnet
+- **Google Gemini** (FREE - what we're using as primary) - Gemini 2.5 Flash
+- **Anthropic Claude** (Paid - secondary option) - Claude 3.5 Sonnet
 - OpenAI GPT-4
-- Google Gemini
 - Meta Llama
 
 ### How it Works in This Project:
 ```
-User Question → API Call to Claude → LLM Processing → Intelligent Response
+User Question → API Call to LLM (Gemini/Claude) → LLM Processing → Intelligent Response
 ```
 
 ### Key Limitations:
@@ -43,11 +43,18 @@ User Question → API Call to Claude → LLM Processing → Intelligent Response
 - **No real-time data** - Doesn't know current events without external data
 - **Context window limits** - Can only process limited amount of text at once
 
-### Why Use Claude API?
-- State-of-the-art reasoning capabilities
-- 200K token context window (large working memory)
-- Strong coding and analysis abilities
+### Why Use Gemini API (Primary)?
+- **FREE** - 60 requests/min, 1500 requests/day
+- 1M+ token context window (massive working memory)
+- Fast inference with Gemini 2.5 Flash
 - Built-in safety features
+- Perfect for learning and MVP development
+
+### Alternative: Claude API (Optional Paid)
+- State-of-the-art reasoning capabilities
+- 200K token context window
+- Strong coding and analysis abilities
+- Requires paid API access
 
 ---
 
@@ -426,7 +433,7 @@ Success!
 └────────────────────────┬───────────────────────────────────┘
                          ↓
 ┌────────────────────────────────────────────────────────────┐
-│ 4. LLM (Claude API)                                         │
+│ 4. LLM Provider (Gemini/Claude API)                         │
 │    - Receives question + retrieved context                  │
 │    - Generates comprehensive answer                         │
 │    - Cites sources                                          │
@@ -447,9 +454,10 @@ Success!
 ## 🎯 What We'll Build in This Project
 
 ### Phase 1: LLM Integration
-- Direct Claude API calls
+- Multi-provider LLM support (Gemini primary, Claude secondary)
+- Direct API calls to LLM providers
 - Token management
-- Streaming responses
+- Request/Response handling
 
 ### Phase 2: Prompt Engineering
 - Implement all 4 techniques
@@ -486,10 +494,12 @@ Success!
 ## 📖 Learning Resources
 
 ### LLMs
-- [Anthropic Claude Documentation](https://docs.anthropic.com/)
+- [Google Gemini API Documentation](https://ai.google.dev/docs) - PRIMARY (FREE)
+- [Anthropic Claude Documentation](https://docs.anthropic.com/) - Secondary (Paid)
 - [How LLMs Work - 3Blue1Brown](https://www.youtube.com/watch?v=wjZofJX0v4M)
 
 ### Prompt Engineering
+- [Google Gemini Prompting Guide](https://ai.google.dev/gemini-api/docs/prompting-intro)
 - [Anthropic Prompt Engineering Guide](https://docs.anthropic.com/claude/docs/prompt-engineering)
 - [OpenAI Prompt Engineering Best Practices](https://platform.openai.com/docs/guides/prompt-engineering)
 
@@ -498,6 +508,7 @@ Success!
 - [Understanding Vector Embeddings](https://www.pinecone.io/learn/vector-embeddings/)
 
 ### Agentic AI
+- [Google Gemini Function Calling](https://ai.google.dev/gemini-api/docs/function-calling)
 - [LangChain Agents](https://python.langchain.com/docs/modules/agents/)
 - [Anthropic Tool Use Guide](https://docs.anthropic.com/claude/docs/tool-use)
 
@@ -512,7 +523,8 @@ Success!
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | **Backend** | Java 21, Spring Boot 3.2 | Application framework |
-| **LLM** | Anthropic Claude 3.5 Sonnet | AI reasoning and generation |
+| **LLM** | Google Gemini 2.5 Flash (FREE, Primary) | AI reasoning and generation |
+| **LLM Alt** | Anthropic Claude 3.5 Sonnet (Paid, Optional) | Alternative AI provider |
 | **Database** | Oracle 23c Free | Vector storage & ACID transactions |
 | **Workflow** | Camunda 8.7 | Process orchestration |
 | **Build Tool** | Maven 3.9 | Dependency management |

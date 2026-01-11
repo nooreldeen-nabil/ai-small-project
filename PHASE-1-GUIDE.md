@@ -1,11 +1,13 @@
 # Phase 1: Foundation Setup + LLM Integration
 
+> **🆓 PROVIDER UPDATE**: This project now uses **Google Gemini** as the PRIMARY provider (FREE tier with 1,500 requests/day). Anthropic Claude is available as an OPTIONAL secondary provider (paid tier). The multi-provider architecture allows easy switching between providers.
+
 ## 🎯 Learning Objectives
 
 By the end of Phase 1, you will understand:
 
 1. ✅ **What is an LLM** and how does it work at a high level
-2. ✅ **How to integrate** with Anthropic Claude API
+2. ✅ **How to integrate** with LLM APIs (Google Gemini as primary FREE provider)
 3. ✅ **Request/Response structure** of LLM APIs
 4. ✅ **Token management** and cost implications
 5. ✅ **Error handling** when working with external APIs
@@ -23,17 +25,22 @@ A **Large Language Model** is an AI system that:
 - Can understand context and generate human-like text
 - Can perform various tasks: Q&A, summarization, coding, analysis, etc.
 
-### How Does Claude Work?
+### How Does an LLM Work?
 
 ```
-Your Prompt → Claude's Neural Network → Generated Response
-              (175 billion parameters)
+Your Prompt → LLM's Neural Network → Generated Response
+              (billions of parameters)
 ```
 
+**Example with Google Gemini (our primary provider)**:
 1. **You send a message** (text input)
-2. **Claude processes it** using its neural network
-3. **Claude generates a response** word by word (technically, token by token)
+2. **Gemini processes it** using its neural network
+3. **Gemini generates a response** word by word (technically, token by token)
 4. **You receive the response** with metadata (tokens used, etc.)
+
+**Note**: This project supports multiple LLM providers:
+- **Google Gemini** (PRIMARY): FREE tier with generous limits, gemini-2.5-flash model
+- **Anthropic Claude** (OPTIONAL): Paid tier, claude-3-5-sonnet model
 
 ### Key Concepts:
 
@@ -43,9 +50,10 @@ Your Prompt → Claude's Neural Network → Generated Response
 - Why it matters: You pay per token!
 
 #### Context Window
-- Maximum amount of text Claude can process at once
-- Claude 3.5 Sonnet: 200,000 tokens (~150,000 words)
-- Includes both your prompt AND Claude's response
+- Maximum amount of text an LLM can process at once
+- **Google Gemini 2.5 Flash**: 1,000,000+ tokens (~750,000 words) - MASSIVE!
+- **Claude 3.5 Sonnet**: 200,000 tokens (~150,000 words)
+- Includes both your prompt AND the LLM's response
 
 #### Temperature
 - Controls randomness (0.0 to 1.0)
@@ -54,9 +62,30 @@ Your Prompt → Claude's Neural Network → Generated Response
 - **High (0.8-1.0)**: Creative, random, varied
 
 #### Stop Reason
-- Why did Claude stop responding?
-- `end_turn`: Natural completion (finished the thought)
-- `max_tokens`: Hit the token limit (response was cut off)
+- Why did the LLM stop responding?
+- `end_turn` / `STOP`: Natural completion (finished the thought)
+- `max_tokens` / `MAX_TOKENS`: Hit the token limit (response was cut off)
+- Different providers use different naming conventions
+
+### Choosing Between Providers
+
+#### Use Gemini (PRIMARY - FREE) When:
+✅ Learning and development
+✅ Cost is a concern (it's FREE!)
+✅ Need fast responses
+✅ Need huge context window (1M+ tokens)
+✅ Building prototypes and MVPs
+✅ Rate limits are acceptable (1,500/day, 15/minute)
+
+#### Use Claude (OPTIONAL - PAID) When:
+💰 Need highest quality responses
+💰 Complex reasoning tasks
+💰 Better instruction following required
+💰 Commercial production use
+💰 Need higher rate limits
+💰 Budget allows for paid API
+
+**For this learning project: Stick with Gemini (FREE)!**
 
 ---
 
@@ -83,38 +112,40 @@ Here's what we built in Phase 1:
 ┌─────────────────────────────────────────────────────────────┐
 │                     ChatService                             │
 │  • Business logic layer                                     │
-│  • Converts ChatRequest → ClaudeApiRequest                  │
-│  • Converts ClaudeApiResponse → ChatResponse                │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  ClaudeApiService                           │
-│  • HTTP client for Anthropic API                            │
-│  • Handles authentication (API key)                         │
-│  • Manages timeouts and retries                             │
-│  • Parses responses                                         │
-└────────────────────────┬────────────────────────────────────┘
-                         │ HTTPS POST
-                         │ https://api.anthropic.com/v1/messages
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Anthropic Claude API                       │
-│               (External Service - The Cloud)                │
-└─────────────────────────────────────────────────────────────┘
+│  • Multi-provider support (routes to Gemini or Claude)     │
+│  • Converts between internal and provider formats          │
+└────────────────┬───────────────────────┬────────────────────┘
+                 │                       │
+                 ▼                       ▼
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│    GeminiApiService         │  │   ClaudeApiService          │
+│    (PRIMARY - FREE)         │  │   (OPTIONAL - PAID)         │
+│  • Google Gemini API client │  │  • Anthropic Claude client  │
+│  • FREE tier!               │  │  • Paid API key required    │
+│  • 1M+ token context        │  │  • 200K token context       │
+└──────────────┬──────────────┘  └──────────────┬──────────────┘
+               │ HTTPS POST                     │ HTTPS POST
+               │ generativelanguage.googleapis  │ api.anthropic.com
+               ▼                                 ▼
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│   Google Gemini API         │  │   Anthropic Claude API      │
+│   (External - FREE Tier)    │  │   (External - Paid)         │
+└─────────────────────────────┘  └─────────────────────────────┘
 ```
 
 ### Why This Layered Architecture?
 
 1. **ChatController**: Handles HTTP concerns (validation, status codes)
-2. **ChatService**: Business logic (converting DTOs, calculations)
-3. **ClaudeApiService**: External API communication (HTTP, auth, parsing)
+2. **ChatService**: Business logic (converting DTOs, routing between providers)
+3. **GeminiApiService / ClaudeApiService**: Provider-specific API communication
 
 Benefits:
 - **Separation of Concerns**: Each layer has one responsibility
+- **Multi-Provider Support**: Easy to switch between Gemini and Claude
 - **Testability**: Can mock each layer independently
 - **Maintainability**: Changes in one layer don't affect others
 - **Reusability**: Services can be used by multiple controllers
+- **Cost Flexibility**: Start with FREE Gemini, upgrade to Claude if needed
 
 ---
 
@@ -124,20 +155,25 @@ Benefits:
 src/main/java/com/ai/mvp/
 ├── LlmAgenticAiMvpApplication.java    # Main Spring Boot application
 ├── config/
-│   └── AnthropicConfig.java           # Claude API configuration
+│   ├── GeminiConfig.java              # Gemini API configuration (PRIMARY)
+│   └── AnthropicConfig.java           # Claude API configuration (OPTIONAL)
 ├── controller/
 │   └── ChatController.java            # REST endpoints
 ├── service/
-│   ├── ChatService.java               # Business logic
-│   └── ClaudeApiService.java          # Claude API client
+│   ├── ChatService.java               # Business logic + multi-provider routing
+│   ├── GeminiApiService.java          # Gemini API client (PRIMARY - FREE)
+│   └── ClaudeApiService.java          # Claude API client (OPTIONAL - PAID)
 ├── dto/
 │   ├── ChatRequest.java               # User request
 │   ├── ChatResponse.java              # User response
-│   ├── ClaudeApiRequest.java          # Internal API request
-│   ├── ClaudeApiResponse.java         # Internal API response
+│   ├── GeminiApiRequest.java          # Gemini API request format
+│   ├── GeminiApiResponse.java         # Gemini API response format
+│   ├── ClaudeApiRequest.java          # Claude API request format
+│   ├── ClaudeApiResponse.java         # Claude API response format
 │   └── ErrorResponse.java             # Error format
 └── exception/
-    ├── ClaudeApiException.java        # Custom exception
+    ├── GeminiApiException.java        # Gemini exception
+    ├── ClaudeApiException.java        # Claude exception
     └── GlobalExceptionHandler.java    # Error handler
 
 src/main/resources/
@@ -213,7 +249,7 @@ curl http://localhost:8080/api/chat/health
 
 ### Test 2: Simple Chat Request ✅
 
-**Purpose**: Send your first message to Claude!
+**Purpose**: Send your first message to the LLM (Gemini by default)!
 
 **URL**: `POST http://localhost:8080/api/chat`
 
@@ -239,31 +275,32 @@ curl -X POST http://localhost:8080/api/chat \
   -d "{\"message\": \"What is a Large Language Model? Explain in simple terms.\"}"
 ```
 
-**Expected Response**:
+**Expected Response** (Using Gemini - PRIMARY FREE provider):
 ```json
 {
   "response": "A Large Language Model (LLM) is...",
-  "model": "claude-3-5-sonnet-20241022",
+  "model": "gemini-2.5-flash",
   "tokensUsed": 245,
   "inputTokens": 45,
   "outputTokens": 200,
   "timestamp": "2026-01-11T15:30:00",
-  "stopReason": "end_turn"
+  "stopReason": "STOP"
 }
 ```
 
 **What to Notice**:
-- `response`: Claude's actual answer
-- `tokensUsed`: Total tokens consumed
+- `response`: The LLM's actual answer
+- `model`: "gemini-2.5-flash" (FREE tier) or "claude-3-5-sonnet-20241022" (paid)
+- `tokensUsed`: Total tokens consumed (FREE with Gemini!)
 - `inputTokens`: Your message (prompt)
-- `outputTokens`: Claude's response
-- `stopReason`: Why Claude stopped (usually "end_turn")
+- `outputTokens`: The LLM's response
+- `stopReason`: Why it stopped ("STOP" for Gemini, "end_turn" for Claude)
 
 ---
 
 ### Test 3: Chat with System Prompt ✅
 
-**Purpose**: Guide Claude's behavior with a system prompt
+**Purpose**: Guide the LLM's behavior with a system prompt
 
 **Request**:
 ```json
@@ -274,8 +311,9 @@ curl -X POST http://localhost:8080/api/chat \
 ```
 
 **What's Different?**
-- `systemPrompt` tells Claude how to behave
-- Think of it as Claude's "personality" or "role"
+- `systemPrompt` tells the LLM how to behave
+- Think of it as the LLM's "personality" or "role"
+- Works with both Gemini and Claude!
 
 **Try These System Prompts**:
 - `"You are a helpful Java programming tutor"`
@@ -378,28 +416,56 @@ Response:
 
 ### Cost Breakdown
 
+### 🆓 **Google Gemini (PRIMARY - FREE Tier)**
+
+**Gemini 2.5 Flash Pricing** (as of Jan 2026):
+- Input tokens: **FREE** up to 1,500 requests per day
+- Output tokens: **FREE** up to 1,500 requests per day
+- Rate limit: 15 requests per minute (RPM)
+
+**This Request with Gemini**:
+- Input cost: **$0.00** (FREE!)
+- Output cost: **$0.00** (FREE!)
+- **Total cost: $0.00** ✨
+
+### Practical Implications with Gemini
+
+**1,000 requests = $0.00** (COMPLETELY FREE!)
+
+For your learning project:
+- ~100-500 requests during development
+- **Total cost: $0.00** for the entire week! 🎉
+
+---
+
+### 💰 **Anthropic Claude (OPTIONAL - Paid Tier)**
+
 **Claude 3.5 Sonnet Pricing** (as of Jan 2026):
 - Input tokens: $3 per million tokens
 - Output tokens: $15 per million tokens
 
-**This Request**:
+**This Request with Claude**:
 - Input cost: (50 / 1,000,000) × $3 = $0.00015
 - Output cost: (150 / 1,000,000) × $15 = $0.00225
-- **Total cost: $0.00240** (less than a quarter of a cent!)
+- **Total cost: $0.00240** (less than a quarter of a cent)
 
-### Practical Implications
+**1,000 requests with Claude = $2.40**
 
-**1,000 requests like this = $2.40**
+### Why Use Claude?
+- Higher quality responses for complex tasks
+- Better instruction following
+- Longer context if you pay for Claude 3 Opus
+- Commercial use without rate limits
 
-For your learning project, you'll probably use:
-- ~100-500 requests during development
-- **Total cost: $0.50 - $2.50** for the entire week!
+**For learning: Use Gemini (FREE). For production: Consider Claude (PAID).**
 
-### Tips to Save Money:
-1. Set `maxTokens` appropriately (don't use 4096 if you need 100)
-2. Use lower temperature for factual questions (faster, shorter)
-3. Cache responses during development (implement in Phase 2)
-4. Use system prompts to guide shorter responses
+### Tips to Optimize Usage:
+1. **Start with Gemini (FREE)** - No cost for learning and development!
+2. Set `maxTokens` appropriately (don't use 4096 if you need 100)
+3. Use lower temperature for factual questions (faster, shorter)
+4. Cache responses during development (implement in Phase 2)
+5. Use system prompts to guide shorter responses
+6. **Switch to Claude** only if you need higher quality for specific tasks
 
 ---
 
@@ -450,9 +516,16 @@ SERVER_PORT=8081
 
 ### Problem: "Invalid API key" error
 
-**Symptoms**: 401 Unauthorized responses
+**Symptoms**: 401 Unauthorized or API authentication errors
 
-**Solution**:
+**Solution for Gemini (PRIMARY)**:
+1. Check `.env` file exists
+2. Verify `GEMINI_API_KEY` is correct
+3. Key should start with `AIza...`
+4. No extra spaces or quotes around the key
+5. Restart application after changing `.env`
+
+**Solution for Claude (OPTIONAL)**:
 1. Check `.env` file exists
 2. Verify `ANTHROPIC_API_KEY` is correct
 3. Key should start with `sk-ant-api03-`
@@ -496,17 +569,19 @@ docker-compose up -d oracle-23c
 
 ---
 
-### Problem: Slow responses from Claude
+### Problem: Slow responses from LLM
 
 **Possible Causes**:
 1. Large `maxTokens` setting
 2. Network latency
-3. Claude API is under heavy load
+3. Provider API is under heavy load
+4. Claude is slower than Gemini (but higher quality)
 
 **Solutions**:
 - Set reasonable `maxTokens` (100-500 for most queries)
 - Check logs for actual response time
 - Increase timeout in `application.yml` if needed
+- **Try Gemini if Claude is slow** - Gemini is generally faster!
 
 ---
 
@@ -520,7 +595,7 @@ Let's trace a request step by step:
 ```json
 POST /api/chat
 {
-  "message": "Hello Claude!"
+  "message": "Hello!"
 }
 ```
 
@@ -532,26 +607,37 @@ public ResponseEntity<ChatResponse> chat(@Valid @RequestBody ChatRequest request
 - If message is empty, validation fails → 400 error
 - If valid, proceeds to service
 
-#### 3. ChatService processes it (ChatService.java:35)
+#### 3. ChatService processes it (ChatService.java)
 ```java
 public ChatResponse chat(ChatRequest chatRequest)
 ```
-- Creates ClaudeApiRequest using helper method
-- Calls ClaudeApiService
+- Routes to appropriate provider (Gemini by default)
+- Creates provider-specific API request
+- Calls GeminiApiService or ClaudeApiService
 
-#### 4. ClaudeApiService sends to Claude (ClaudeApiService.java:74)
+#### 4. Provider API Service sends to LLM
+**GeminiApiService (PRIMARY - FREE)**:
+```java
+public GeminiApiResponse sendMessage(GeminiApiRequest request)
+```
+- Converts request to Gemini format
+- Adds API key authentication
+- Sends HTTP POST to Google Generative AI API
+- Parses JSON response
+
+**ClaudeApiService (OPTIONAL - PAID)**:
 ```java
 public ClaudeApiResponse sendMessage(ClaudeApiRequest request)
 ```
-- Converts request to JSON
+- Converts request to Claude format
 - Adds authentication headers (API key)
-- Sends HTTP POST to Anthropic
-- Waits for response
+- Sends HTTP POST to Anthropic API
 - Parses JSON response
 
 #### 5. Response flows back up
-- ClaudeApiResponse → ChatService → ChatController → User
+- Provider Response → ChatService → ChatController → User
 - Each layer transforms the data appropriately
+- User doesn't need to know which provider was used!
 
 ---
 
@@ -560,18 +646,21 @@ public ClaudeApiResponse sendMessage(ClaudeApiRequest request)
 ### Conceptual Learnings:
 
 1. **LLMs are APIs**: They're external services you call via HTTP
-2. **Tokens matter**: They determine both speed and cost
-3. **Temperature controls creativity**: Low = consistent, High = creative
-4. **System prompts guide behavior**: Like giving Claude a role to play
-5. **Error handling is critical**: External APIs can fail in many ways
+2. **Multiple providers exist**: Gemini (FREE), Claude (PAID), GPT, etc.
+3. **Tokens matter**: They determine both speed and cost (or FREE with Gemini!)
+4. **Temperature controls creativity**: Low = consistent, High = creative
+5. **System prompts guide behavior**: Like giving the LLM a role to play
+6. **Error handling is critical**: External APIs can fail in many ways
+7. **Start FREE, scale paid**: Use Gemini for development, Claude for production if needed
 
 ### Technical Learnings:
 
-1. **Layered architecture**: Controller → Service → External API
-2. **DTOs for data transfer**: Separate internal and external formats
-3. **Configuration management**: Use .env for secrets, YAML for settings
-4. **Exception handling**: Global handler provides consistent errors
-5. **REST API design**: Clear endpoints, proper status codes, good documentation
+1. **Layered architecture**: Controller → Service → Multiple Provider APIs
+2. **Multi-provider pattern**: Abstract provider differences, unified interface
+3. **DTOs for data transfer**: Separate internal and external formats per provider
+4. **Configuration management**: Use .env for secrets, YAML for settings
+5. **Exception handling**: Global handler provides consistent errors across providers
+6. **REST API design**: Clear endpoints, proper status codes, good documentation
 
 ### Spring Boot Learnings:
 
@@ -589,14 +678,15 @@ Before moving to Phase 2, make sure you can:
 
 - [ ] Start the Spring Boot application successfully
 - [ ] Send a simple chat request via Postman
-- [ ] Understand the response structure (tokens, model, etc.)
-- [ ] Use system prompts to guide Claude's behavior
+- [ ] Understand the response structure (tokens, model, provider, etc.)
+- [ ] Know that Gemini is PRIMARY (FREE) and Claude is OPTIONAL (PAID)
+- [ ] Use system prompts to guide the LLM's behavior
 - [ ] Adjust temperature and see different responses
 - [ ] Handle errors (empty message, invalid params)
 - [ ] View API docs in Swagger UI
-- [ ] Calculate approximate cost of requests
-- [ ] Explain how the request flows through the code
-- [ ] Understand the three-layer architecture
+- [ ] Understand Gemini's FREE tier vs Claude's PAID tier
+- [ ] Explain how the request flows through the multi-provider architecture
+- [ ] Understand the layered architecture with multiple LLM providers
 
 ---
 
@@ -611,24 +701,29 @@ Before moving to Phase 2, make sure you can:
 2. **Live Demo** (5 minutes)
    - Open Swagger UI
    - Send a simple question: "What is Spring Boot?"
-   - Show the response with token counts
+   - Show the response with Gemini (FREE tier!)
+   - Point out the model: "gemini-2.5-flash"
    - Demonstrate system prompt: "You are a Java expert"
    - Show error handling: Send empty message
 
 3. **Cost Discussion** (2 minutes)
-   - Explain token-based pricing
-   - Show example calculation
-   - Mention the cost is very low for learning
+   - **Highlight Gemini is FREE** - 1,500 requests/day at no cost!
+   - Explain Claude as optional paid alternative
+   - Show the cost comparison
+   - Emphasize: "We can develop for FREE, scale to paid if needed"
 
 4. **Key Takeaways** (1 minute)
-   - Successfully integrated with Claude API
+   - Successfully integrated with Google Gemini (FREE) as primary provider
+   - Claude available as optional paid alternative
+   - Multi-provider architecture supports easy switching
    - Built foundation for more advanced features
    - Ready to move to Phase 2: Prompt Engineering
 
 ### Talking Points:
-- "We've successfully integrated with Anthropic's Claude API"
+- "We've integrated with Google Gemini's FREE tier as our primary provider"
+- "Multi-provider architecture allows switching to Claude if needed"
 - "The application follows clean architecture principles"
-- "Token-based pricing means costs scale with usage"
+- "Zero cost for development and learning with Gemini!"
 - "This foundation supports all upcoming phases"
 
 ---

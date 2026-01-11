@@ -149,7 +149,7 @@ Check that `.env` file exists in project root:
 dir .env
 ```
 
-The file should contain your Anthropic API key and all configurations.
+The file should contain your Gemini API key (primary FREE provider) and all configurations.
 
 ---
 

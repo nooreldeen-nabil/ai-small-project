@@ -12,14 +12,14 @@ Build an intelligent document Q&A system that demonstrates LLM, Agentic AI, Prom
 
 #### What You'll Learn:
 - ✅ What is an LLM (Large Language Model)?
-- ✅ How to call Anthropic Claude API
+- ✅ How to call LLM APIs (Google Gemini as primary FREE provider)
 - ✅ Request/Response structure
 - ✅ Token management and streaming
 
 #### What We'll Build:
 - Spring Boot project skeleton
-- REST endpoint: `/api/chat` - simple chat with Claude
-- Configuration for Anthropic API
+- REST endpoint: `/api/chat` - simple chat with LLM
+- Multi-provider LLM configuration (Gemini + Claude support)
 - Basic error handling
 
 #### Deliverables:
@@ -91,7 +91,7 @@ Build an intelligent document Q&A system that demonstrates LLM, Agentic AI, Prom
 - Automatic chunking and vectorization
 - RAG endpoint: `/api/qa/document`
   - Retrieves relevant chunks from vector DB
-  - Sends chunks + question to Claude
+  - Sends chunks + question to LLM
   - Returns accurate answer with sources
 - Citation tracking
 
@@ -106,7 +106,7 @@ Build an intelligent document Q&A system that demonstrates LLM, Agentic AI, Prom
 
 #### What You'll Learn:
 - ✅ What is Agentic AI?
-- ✅ Tool/Function calling in Claude
+- ✅ Tool/Function calling in LLMs
 - ✅ How agents decide which tools to use
 - ✅ Multi-step reasoning
 
@@ -140,7 +140,7 @@ Build an intelligent document Q&A system that demonstrates LLM, Agentic AI, Prom
 #### What We'll Build:
 - BPMN workflow: "Intelligent Document Processing"
   1. Document Upload
-  2. AI Classification (Claude determines document type)
+  2. AI Classification (LLM determines document type)
   3. AI Extraction (Extract key information)
   4. Human Review Task (if confidence low)
   5. Storage in Oracle
@@ -192,9 +192,9 @@ Build an intelligent document Q&A system that demonstrates LLM, Agentic AI, Prom
         │                  │                 │
         ▼                  ▼                 ▼
 ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-│  Anthropic   │   │  Oracle 23c  │   │  Camunda 8.7 │
-│ Claude API   │   │   Database   │   │    Zeebe     │
-│              │   │ (Vector DB)  │   │              │
+│    Google    │   │  Oracle 23c  │   │  Camunda 8.7 │
+│  Gemini API  │   │   Database   │   │    Zeebe     │
+│   (PRIMARY)  │   │ (Vector DB)  │   │              │
 └──────────────┘   └──────────────┘   └──────────────┘
 ```
 
@@ -203,7 +203,7 @@ Build an intelligent document Q&A system that demonstrates LLM, Agentic AI, Prom
 ## 📦 Technology Stack
 
 - **Backend:** Java 21, Spring Boot 3.2+
-- **LLM:** Anthropic Claude API (your Pro subscription)
+- **LLM:** Google Gemini API (FREE tier - Primary), Claude API (Optional paid)
 - **Database:** Oracle 23c AI with Vector Search
 - **Workflow:** Camunda 8.7 (your Docker setup)
 - **Build Tool:** Maven
@@ -229,7 +229,7 @@ Each day, you'll be able to demonstrate:
 ### 1. **LLM (Large Language Model)**
 - Pre-trained neural networks with billions of parameters
 - Understand and generate human-like text
-- Examples: Claude, GPT-4, Llama
+- Examples: Google Gemini, Claude, GPT-4, Llama
 - Use cases: Chat, summarization, analysis, code generation
 
 ### 2. **Agentic AI**

@@ -12,7 +12,7 @@ import org.springframework.core.env.Environment;
  * Main Spring Boot Application for LLM Agentic AI MVP
  *
  * This application demonstrates four key AI concepts:
- * 1. LLM (Large Language Models) - Integration with Anthropic Claude API
+ * 1. LLM (Large Language Models) - Multi-provider integration (Gemini FREE, Claude PAID)
  * 2. Prompt Engineering - Different prompting strategies and techniques
  * 3. Vector Database - Oracle 23c AI Vector Search for semantic similarity
  * 4. Agentic AI - Autonomous AI agents with tool use and workflow orchestration

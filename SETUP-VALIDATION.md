@@ -73,11 +73,23 @@ If you want to use existing Oracle 19c (won't have native vector support):
 
 ---
 
-### 7. Anthropic Claude API Key
-Check if you have your API key:
+### 7. LLM API Keys
+
+#### Primary (FREE): Google Gemini API Key
+**Recommended for learning and MVP development**
+- Go to: https://aistudio.google.com/app/apikey
+- Click "Create API Key"
+- Select "Create API key in new project"
+- Keep it ready (we'll use it in `.env` file)
+
+**Format:** `AIzaSy...`
+**FREE Tier:** 60 requests/min, 1500 requests/day
+
+#### Optional (PAID): Anthropic Claude API Key
+Only needed if you want to use Claude instead of Gemini
 - Go to: https://console.anthropic.com/settings/keys
 - Create a new API key if needed
-- Keep it ready (we'll use it in application.properties)
+- Keep it ready (optional)
 
 **Format:** `sk-ant-api03-...`
 
