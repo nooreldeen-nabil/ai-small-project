@@ -1,0 +1,29 @@
+# ============================================================================
+# LLM Agentic AI MVP - Local Development Configuration
+# ============================================================================
+# This configuration is used when SPRING_PROFILES_ACTIVE=local
+# ============================================================================
+
+spring:
+  jpa:
+    show-sql: true  # Show SQL in console for debugging
+    properties:
+      hibernate:
+        format_sql: true
+
+# Logging - More verbose for local development
+logging:
+  level:
+    root: INFO
+    com.ai.mvp: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.data: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    okhttp3: DEBUG
+
+# Server error details - Show full stack traces in local
+server:
+  error:
+    include-stacktrace: always
+    include-exception: true
