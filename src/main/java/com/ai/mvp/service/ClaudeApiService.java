@@ -3,7 +3,7 @@ package com.ai.mvp.service;
 import com.ai.mvp.config.AnthropicConfig;
 import com.ai.mvp.dto.ClaudeApiRequest;
 import com.ai.mvp.dto.ClaudeApiResponse;
-import com.ai.mvp.exception.ClaudeApiException;
+import com.ai.mvp.exception.LlmApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +70,7 @@ public class ClaudeApiService {
      *
      * @param request The request to send to Claude
      * @return Claude's response
-     * @throws ClaudeApiException if the API call fails
+     * @throws LlmApiException if the API call fails
      */
     public ClaudeApiResponse sendMessage(ClaudeApiRequest request) {
         try {
@@ -116,10 +116,10 @@ public class ClaudeApiService {
 
         } catch (IOException e) {
             log.error("Network error calling Claude API: {}", e.getMessage(), e);
-            throw new ClaudeApiException("Network error calling Claude API: " + e.getMessage(), e);
+            throw new LlmApiException("Network error calling Claude API: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Unexpected error calling Claude API: {}", e.getMessage(), e);
-            throw new ClaudeApiException("Unexpected error calling Claude API: " + e.getMessage(), e);
+            throw new LlmApiException("Unexpected error calling Claude API: " + e.getMessage(), e);
         }
     }
 
@@ -151,17 +151,17 @@ public class ClaudeApiService {
         // Map status codes to user-friendly messages
         switch (statusCode) {
             case 400:
-                throw new ClaudeApiException("Invalid request: " + errorMessage, statusCode, errorType);
+                throw new LlmApiException("Invalid request: " + errorMessage, "Claude", statusCode, errorType);
             case 401:
-                throw new ClaudeApiException("Authentication failed. Check your API key.", statusCode, errorType);
+                throw new LlmApiException("Authentication failed. Check your API key.", "Claude", statusCode, errorType);
             case 429:
-                throw new ClaudeApiException("Rate limit exceeded. Please try again later.", statusCode, errorType);
+                throw new LlmApiException("Rate limit exceeded. Please try again later.", "Claude", statusCode, errorType);
             case 500:
             case 502:
             case 503:
-                throw new ClaudeApiException("Anthropic service is temporarily unavailable. Please try again later.", statusCode, errorType);
+                throw new LlmApiException("Anthropic service is temporarily unavailable. Please try again later.", "Claude", statusCode, errorType);
             default:
-                throw new ClaudeApiException("API error: " + errorMessage, statusCode, errorType);
+                throw new LlmApiException("API error: " + errorMessage, "Claude", statusCode, errorType);
         }
     }
 

@@ -3,7 +3,7 @@ package com.ai.mvp.service;
 import com.ai.mvp.config.GeminiConfig;
 import com.ai.mvp.dto.gemini.GeminiApiRequest;
 import com.ai.mvp.dto.gemini.GeminiApiResponse;
-import com.ai.mvp.exception.ClaudeApiException;
+import com.ai.mvp.exception.LlmApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +62,7 @@ public class GeminiApiService {
      *
      * @param request The request to send to Gemini
      * @return Gemini's response
-     * @throws ClaudeApiException if the API call fails (reusing for simplicity)
+     * @throws LlmApiException if the API call fails (reusing for simplicity)
      */
     public GeminiApiResponse sendMessage(GeminiApiRequest request) {
         try {
@@ -112,10 +112,10 @@ public class GeminiApiService {
 
         } catch (IOException e) {
             log.error("Network error calling Gemini API: {}", e.getMessage(), e);
-            throw new ClaudeApiException("Network error calling Gemini API: " + e.getMessage(), e);
+            throw new LlmApiException("Network error calling Gemini API: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Unexpected error calling Gemini API: {}", e.getMessage(), e);
-            throw new ClaudeApiException("Unexpected error calling Gemini API: " + e.getMessage(), e);
+            throw new LlmApiException("Unexpected error calling Gemini API: " + e.getMessage(), e);
         }
     }
 
@@ -141,17 +141,17 @@ public class GeminiApiService {
         // Map status codes to user-friendly messages
         switch (statusCode) {
             case 400:
-                throw new ClaudeApiException("Invalid request to Gemini: " + errorMessage, statusCode, errorType);
+                throw new LlmApiException("Invalid request to Gemini: " + errorMessage, "Gemini", statusCode, errorType);
             case 403:
-                throw new ClaudeApiException("API key invalid or quota exceeded. Check your Gemini API key.", statusCode, errorType);
+                throw new LlmApiException("API key invalid or quota exceeded. Check your Gemini API key.", "Gemini", statusCode, errorType);
             case 429:
-                throw new ClaudeApiException("Rate limit exceeded. Please try again later.", statusCode, errorType);
+                throw new LlmApiException("Rate limit exceeded. Please try again later.", "Gemini", statusCode, errorType);
             case 500:
             case 502:
             case 503:
-                throw new ClaudeApiException("Gemini service is temporarily unavailable. Please try again later.", statusCode, errorType);
+                throw new LlmApiException("Gemini service is temporarily unavailable. Please try again later.", "Gemini", statusCode, errorType);
             default:
-                throw new ClaudeApiException("Gemini API error: " + errorMessage, statusCode, errorType);
+                throw new LlmApiException("Gemini API error: " + errorMessage, "Gemini", statusCode, errorType);
         }
     }
 

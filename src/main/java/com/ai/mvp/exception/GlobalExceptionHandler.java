@@ -76,24 +76,26 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle Claude API errors
+     * Handle LLM API errors
      *
-     * These are errors from Anthropic's API:
+     * These are errors from any LLM provider (Claude, Gemini, etc.):
      * - Invalid API key
      * - Rate limiting
      * - Service unavailable
+     * - Model not found
      * etc.
      */
-    @ExceptionHandler(ClaudeApiException.class)
-    public ResponseEntity<ErrorResponse> handleClaudeApiException(
-            ClaudeApiException ex,
+    @ExceptionHandler(LlmApiException.class)
+    public ResponseEntity<ErrorResponse> handleLlmApiException(
+            LlmApiException ex,
             HttpServletRequest request) {
 
         String requestId = UUID.randomUUID().toString();
-        log.error("[{}] Claude API error on {}: {}",
-                requestId, request.getRequestURI(), ex.getMessage(), ex);
+        String provider = ex.getProvider() != null ? ex.getProvider() : "LLM";
+        log.error("[{}] {} API error on {}: {}",
+                requestId, provider, request.getRequestURI(), ex.getMessage(), ex);
 
-        // Map Claude API status codes to HTTP status codes
+        // Map API status codes to HTTP status codes
         HttpStatus httpStatus;
         if (ex.getStatusCode() != null) {
             switch (ex.getStatusCode()) {
@@ -101,7 +103,11 @@ public class GlobalExceptionHandler {
                     httpStatus = HttpStatus.BAD_REQUEST;
                     break;
                 case 401:
+                case 403:
                     httpStatus = HttpStatus.UNAUTHORIZED;
+                    break;
+                case 404:
+                    httpStatus = HttpStatus.NOT_FOUND;
                     break;
                 case 429:
                     httpStatus = HttpStatus.TOO_MANY_REQUESTS;
@@ -118,9 +124,10 @@ public class GlobalExceptionHandler {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
+        String errorCode = provider.toUpperCase() + "_API_ERROR";
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(httpStatus.value())
-                .error("CLAUDE_API_ERROR")
+                .error(errorCode)
                 .message(ex.getMessage())
                 .details(ex.getErrorType() != null ? "Error Type: " + ex.getErrorType() : null)
                 .path(request.getRequestURI())
