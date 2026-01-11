@@ -88,8 +88,8 @@ anthropic:
 # ============================================================================
 gemini:
   api-key: ${GEMINI_API_KEY}
-  api-url: https://generativelanguage.googleapis.com/v1beta
-  model: ${GEMINI_MODEL:gemini-pro}
+  api-url: https://generativelanguage.googleapis.com/v1
+  model: ${GEMINI_MODEL:gemini-1.5-flash}
   max-tokens: ${GEMINI_MAX_TOKENS:2048}
   temperature: 0.7
   timeout-seconds: 60
