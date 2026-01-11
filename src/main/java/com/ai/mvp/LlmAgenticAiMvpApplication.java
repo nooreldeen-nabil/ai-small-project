@@ -66,6 +66,7 @@ public class LlmAgenticAiMvpApplication {
         Environment env = event.getApplicationContext().getEnvironment();
         String port = env.getProperty("server.port", "8080");
         String contextPath = env.getProperty("server.servlet.context-path", "");
+        String provider = env.getProperty("llm.provider", "GEMINI");
 
         log.info("");
         log.info("=".repeat(80));
@@ -78,16 +79,33 @@ public class LlmAgenticAiMvpApplication {
         log.info("   • Health Check:   http://localhost:{}{}/actuator/health", port, contextPath);
         log.info("");
         log.info("📚 Learning Endpoints (Phase 1):");
-        log.info("   • POST /api/chat                    - Simple chat with Claude");
+        log.info("   • POST /api/chat                    - Chat with LLM");
+        log.info("   • GET  /api/chat/health             - Health check");
         log.info("");
         log.info("🗄️  Database:");
-        log.info("   • Oracle 23c AI Vector Search");
+        log.info("   • Oracle 23c AI Vector Search (prepared, not yet used)");
         log.info("");
-        log.info("🤖 AI Integration:");
-        log.info("   • Anthropic Claude API (Model: {})",
-                env.getProperty("anthropic.model", "claude-3-5-sonnet-20241022"));
+        log.info("🤖 AI Provider: {} (Active)", provider);
+
+        // Show active provider details
+        if ("GEMINI".equalsIgnoreCase(provider)) {
+            log.info("   • Google Gemini API ✅ FREE");
+            log.info("   • Model: {}", env.getProperty("gemini.model", "gemini-1.5-flash"));
+            log.info("   • Free Tier: 60 req/min, 1500 req/day");
+        } else if ("CLAUDE".equalsIgnoreCase(provider)) {
+            log.info("   • Anthropic Claude API");
+            log.info("   • Model: {}", env.getProperty("anthropic.model", "claude-3-5-sonnet-20241022"));
+            log.info("   • Paid Service: Track token usage");
+        }
+
         log.info("");
-        log.info("🔧 Profile: {}", String.join(", ", env.getActiveProfiles()));
+        log.info("💡 Available Providers:");
+        log.info("   • Gemini (Google) - FREE tier available");
+        log.info("   • Claude (Anthropic) - High quality, paid");
+        log.info("   • Switch via .env: LLM_PROVIDER=GEMINI or CLAUDE");
+        log.info("");
+        log.info("🔧 Profile: {}", String.join(", ", env.getActiveProfiles().length > 0 ?
+                env.getActiveProfiles() : new String[]{"default"}));
         log.info("=".repeat(80));
         log.info("");
     }
