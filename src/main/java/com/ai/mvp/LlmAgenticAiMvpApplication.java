@@ -90,7 +90,7 @@ public class LlmAgenticAiMvpApplication {
         // Show active provider details
         if ("GEMINI".equalsIgnoreCase(provider)) {
             log.info("   • Google Gemini API ✅ FREE");
-            log.info("   • Model: {}", env.getProperty("gemini.model", "gemini-1.5-flash"));
+            log.info("   • Model: {}", env.getProperty("gemini.model", "gemini-1.5-flash-latest"));
             log.info("   • Free Tier: 60 req/min, 1500 req/day");
         } else if ("CLAUDE".equalsIgnoreCase(provider)) {
             log.info("   • Anthropic Claude API");

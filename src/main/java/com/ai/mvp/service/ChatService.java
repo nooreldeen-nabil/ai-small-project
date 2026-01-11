@@ -141,7 +141,7 @@ public class ChatService {
     private ChatResponse convertGeminiResponse(GeminiApiResponse apiResponse) {
         return ChatResponse.builder()
                 .response(apiResponse.getTextContent())
-                .model(apiResponse.getModelVersion() != null ? apiResponse.getModelVersion() : "gemini-1.5-flash")
+                .model(apiResponse.getModelVersion() != null ? apiResponse.getModelVersion() : "gemini-1.5-flash-latest")
                 .tokensUsed(apiResponse.getTotalTokens())
                 .inputTokens(apiResponse.getInputTokens())
                 .outputTokens(apiResponse.getOutputTokens())
