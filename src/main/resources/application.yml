@@ -106,17 +106,20 @@ vector:
 # ============================================================================
 # Camunda Platform 8 Configuration
 # ============================================================================
-camunda:
-  client:
-    zeebe:
-      gateway-address: ${CAMUNDA_ZEEBE_GATEWAY:localhost:26500}
-      rest-address: ${CAMUNDA_ZEEBE_REST:http://localhost:8088}
-    operate:
-      base-url: ${CAMUNDA_OPERATE_URL:http://localhost:8081}
-    tasklist:
-      base-url: ${CAMUNDA_TASKLIST_URL:http://localhost:8082}
-    optimize:
-      base-url: ${CAMUNDA_OPTIMIZE_URL:http://localhost:8083}
+# NOTE: Camunda configuration commented out for Phase 1
+#       Will be enabled in Phase 6 when we implement workflow orchestration
+#
+#camunda:
+#  client:
+#    zeebe:
+#      gateway-address: ${CAMUNDA_ZEEBE_GATEWAY:localhost:26500}
+#      rest-address: ${CAMUNDA_ZEEBE_REST:http://localhost:8088}
+#    operate:
+#      base-url: ${CAMUNDA_OPERATE_URL:http://localhost:8081}
+#    tasklist:
+#      base-url: ${CAMUNDA_TASKLIST_URL:http://localhost:8082}
+#    optimize:
+#      base-url: ${CAMUNDA_OPTIMIZE_URL:http://localhost:8083}
 
 # ============================================================================
 # Actuator Configuration - Health Checks and Monitoring
