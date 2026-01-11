@@ -23,8 +23,8 @@ Open `.env` file in your project root and update it:
 LLM_PROVIDER=GEMINI
 
 # Google Gemini API Configuration (FREE!)
-GEMINI_API_KEY=AIzaSyAp3nhdcQpncryvJay75xeOsndvjGPTgig
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_API_KEY=your-gemini-api-key-here
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_MAX_TOKENS=2048
 
 # Anthropic Claude API Configuration (optional - can be empty)
@@ -103,7 +103,7 @@ You can easily switch between Claude and Gemini by changing the `.env` file:
 ### Use Gemini (FREE):
 ```properties
 LLM_PROVIDER=GEMINI
-GEMINI_API_KEY=AIzaSyAp3nhdcQpncryvJay75xeOsndvjGPTgig
+GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 ### Use Claude (if you have credits):
