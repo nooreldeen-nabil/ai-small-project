@@ -70,10 +70,12 @@ public class AnthropicConfig {
     /**
      * Validate configuration
      * Called automatically by Spring after properties are loaded
+     * Note: Validation is optional if not using Claude as the provider
      */
     public void validate() {
+        // Skip validation if API key is not set (may be using another provider)
         if (apiKey == null || apiKey.isEmpty()) {
-            throw new IllegalStateException("Anthropic API key is required. Please set ANTHROPIC_API_KEY in .env file");
+            return;
         }
 
         if (!apiKey.startsWith("sk-ant-")) {

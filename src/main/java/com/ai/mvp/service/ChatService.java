@@ -1,11 +1,15 @@
 package com.ai.mvp.service;
 
+import com.ai.mvp.config.LlmProvider;
 import com.ai.mvp.dto.ChatRequest;
 import com.ai.mvp.dto.ChatResponse;
 import com.ai.mvp.dto.ClaudeApiRequest;
 import com.ai.mvp.dto.ClaudeApiResponse;
+import com.ai.mvp.dto.gemini.GeminiApiRequest;
+import com.ai.mvp.dto.gemini.GeminiApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,14 +19,15 @@ import java.time.LocalDateTime;
  *
  * This service:
  * 1. Takes simple ChatRequest from controllers
- * 2. Calls ClaudeApiService to communicate with Anthropic
- * 3. Converts ClaudeApiResponse to user-friendly ChatResponse
+ * 2. Delegates to the appropriate LLM provider (Claude, Gemini, etc.)
+ * 3. Converts provider responses to user-friendly ChatResponse
  *
- * Why separate ClaudeApiService and ChatService?
- * - Separation of concerns: API communication vs business logic
- * - Easier testing: Can mock ClaudeApiService
- * - Flexibility: Can add caching, rate limiting, etc. here
- * - Cleaner code: Controllers don't need to know about Claude API details
+ * Supports multiple LLM providers:
+ * - Claude (Anthropic) - High quality, paid
+ * - Gemini (Google) - Free tier available
+ * - Ollama - Local, completely free
+ *
+ * Provider is configured via application.yml: llm.provider
  */
 @Slf4j
 @Service
@@ -30,35 +35,41 @@ import java.time.LocalDateTime;
 public class ChatService {
 
     private final ClaudeApiService claudeApiService;
+    private final GeminiApiService geminiApiService;
+
+    @Value("${llm.provider:GEMINI}")
+    private String providerName;
 
     /**
      * Send a chat message and get a response
      *
      * This is the main entry point for Phase 1.
-     * Takes a user's message, sends it to Claude, and returns the response.
+     * Takes a user's message, sends it to the configured LLM provider, and returns the response.
      *
      * @param chatRequest The user's message and parameters
-     * @return Claude's response with metadata
+     * @return LLM's response with metadata
      */
     public ChatResponse chat(ChatRequest chatRequest) {
-        log.info("Processing chat request - Message length: {} chars", chatRequest.getMessage().length());
+        LlmProvider provider = LlmProvider.valueOf(providerName.toUpperCase());
+        log.info("Processing chat request using {} - Message length: {} chars",
+                provider, chatRequest.getMessage().length());
 
         try {
-            // Create Claude API request
-            ClaudeApiRequest apiRequest = claudeApiService.createSimpleRequest(
-                    chatRequest.getMessage(),
-                    chatRequest.getSystemPrompt(),
-                    chatRequest.getTemperature(),
-                    chatRequest.getMaxTokens()
-            );
+            ChatResponse response;
 
-            // Call Claude API
-            ClaudeApiResponse apiResponse = claudeApiService.sendMessage(apiRequest);
+            switch (provider) {
+                case CLAUDE:
+                    response = chatWithClaude(chatRequest);
+                    break;
+                case GEMINI:
+                    response = chatWithGemini(chatRequest);
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported LLM provider: " + provider);
+            }
 
-            // Convert to user-friendly response
-            ChatResponse response = convertToResponse(apiResponse);
-
-            log.info("Chat completed successfully - Tokens used: {} (in: {}, out: {})",
+            log.info("Chat completed successfully using {} - Tokens used: {} (in: {}, out: {})",
+                    provider,
                     response.getTokensUsed(),
                     response.getInputTokens(),
                     response.getOutputTokens());
@@ -66,24 +77,53 @@ public class ChatService {
             return response;
 
         } catch (Exception e) {
-            log.error("Error processing chat request: {}", e.getMessage(), e);
+            log.error("Error processing chat request with {}: {}", provider, e.getMessage(), e);
             throw e; // Will be caught by global exception handler
         }
     }
 
     /**
-     * Convert ClaudeApiResponse to ChatResponse
-     *
-     * This method:
-     * - Extracts the text content from Claude's response
-     * - Copies over metadata (tokens, model, etc.)
-     * - Adds timestamp
-     * - Handles any warnings or issues
-     *
-     * @param apiResponse Raw response from Claude API
-     * @return User-friendly chat response
+     * Chat using Claude (Anthropic)
      */
-    private ChatResponse convertToResponse(ClaudeApiResponse apiResponse) {
+    private ChatResponse chatWithClaude(ChatRequest chatRequest) {
+        // Create Claude API request
+        ClaudeApiRequest apiRequest = claudeApiService.createSimpleRequest(
+                chatRequest.getMessage(),
+                chatRequest.getSystemPrompt(),
+                chatRequest.getTemperature(),
+                chatRequest.getMaxTokens()
+        );
+
+        // Call Claude API
+        ClaudeApiResponse apiResponse = claudeApiService.sendMessage(apiRequest);
+
+        // Convert to user-friendly response
+        return convertClaudeResponse(apiResponse);
+    }
+
+    /**
+     * Chat using Gemini (Google)
+     */
+    private ChatResponse chatWithGemini(ChatRequest chatRequest) {
+        // Create Gemini API request
+        GeminiApiRequest apiRequest = geminiApiService.createSimpleRequest(
+                chatRequest.getMessage(),
+                chatRequest.getSystemPrompt(),
+                chatRequest.getTemperature(),
+                chatRequest.getMaxTokens()
+        );
+
+        // Call Gemini API
+        GeminiApiResponse apiResponse = geminiApiService.sendMessage(apiRequest);
+
+        // Convert to user-friendly response
+        return convertGeminiResponse(apiResponse);
+    }
+
+    /**
+     * Convert ClaudeApiResponse to ChatResponse
+     */
+    private ChatResponse convertClaudeResponse(ClaudeApiResponse apiResponse) {
         return ChatResponse.builder()
                 .response(apiResponse.getTextContent())
                 .model(apiResponse.getModel())
@@ -91,6 +131,21 @@ public class ChatService {
                 .inputTokens(apiResponse.getUsage().getInputTokens())
                 .outputTokens(apiResponse.getUsage().getOutputTokens())
                 .stopReason(apiResponse.getStopReason())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    /**
+     * Convert GeminiApiResponse to ChatResponse
+     */
+    private ChatResponse convertGeminiResponse(GeminiApiResponse apiResponse) {
+        return ChatResponse.builder()
+                .response(apiResponse.getTextContent())
+                .model(apiResponse.getModelVersion() != null ? apiResponse.getModelVersion() : "gemini-1.5-flash")
+                .tokensUsed(apiResponse.getTotalTokens())
+                .inputTokens(apiResponse.getInputTokens())
+                .outputTokens(apiResponse.getOutputTokens())
+                .stopReason(apiResponse.getFinishReason())
                 .timestamp(LocalDateTime.now())
                 .build();
     }

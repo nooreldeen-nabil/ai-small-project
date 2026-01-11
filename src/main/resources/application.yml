@@ -66,13 +66,31 @@ server:
     include-exception: false
 
 # ============================================================================
+# LLM Provider Configuration
+# ============================================================================
+llm:
+  # Which LLM provider to use: CLAUDE, GEMINI, or OLLAMA
+  provider: ${LLM_PROVIDER:GEMINI}
+
+# ============================================================================
 # Anthropic Claude API Configuration
 # ============================================================================
 anthropic:
-  api-key: ${ANTHROPIC_API_KEY}
+  api-key: ${ANTHROPIC_API_KEY:}
   api-url: https://api.anthropic.com/v1/messages
   model: ${ANTHROPIC_MODEL:claude-3-5-sonnet-20241022}
   max-tokens: ${ANTHROPIC_MAX_TOKENS:4096}
+  temperature: 0.7
+  timeout-seconds: 60
+
+# ============================================================================
+# Google Gemini API Configuration
+# ============================================================================
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  api-url: https://generativelanguage.googleapis.com/v1beta
+  model: ${GEMINI_MODEL:gemini-1.5-flash}
+  max-tokens: ${GEMINI_MAX_TOKENS:2048}
   temperature: 0.7
   timeout-seconds: 60
 
