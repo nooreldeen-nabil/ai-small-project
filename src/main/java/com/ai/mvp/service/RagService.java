@@ -234,7 +234,7 @@ public class RagService {
 
         return DocumentQAResponse.builder()
                 .question(request.getQuestion())
-                .answer(llmResponse.getMessage())
+                .answer(llmResponse.getResponse())
                 .citations(citations)
                 .confidence(confidence)
                 .documentsSearched(searchResults.getTotalResults())
@@ -242,7 +242,7 @@ public class RagService {
                 .tokensUsed(llmResponse.getTokensUsed())
                 .inputTokens(llmResponse.getInputTokens())
                 .outputTokens(llmResponse.getOutputTokens())
-                .provider(llmResponse.getProvider())
+                .provider(providerName)
                 .timestamp(llmResponse.getTimestamp())
                 .build();
     }
