@@ -10,11 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Clob;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,7 +194,7 @@ public class VectorSearchService {
      * 0: c.id
      * 1: c.document_id
      * 2: c.chunk_index
-     * 3: c.content (CLOB - needs special handling!)
+     * 3: c.content
      * 4: c.start_position
      * 5: c.end_position
      * 6: c.created_at
@@ -207,75 +203,31 @@ public class VectorSearchService {
      * 9: distance
      */
     private DocumentChunk parseChunkFromRow(Object[] row) {
-        try {
-            // Create a basic DocumentChunk with the data we need
-            DocumentChunk chunk = new DocumentChunk();
+        // Create a basic DocumentChunk with the data we need
+        DocumentChunk chunk = new DocumentChunk();
 
-            // Parse chunk fields (indices based on SELECT order)
-            chunk.setId(convertToString(row[0]));
-            chunk.setChunkIndex(((Number) row[2]).intValue()); // Oracle may return as BigDecimal
-            chunk.setContent(convertToString(row[3])); // Handle CLOB
+        // Parse chunk fields (indices based on SELECT order)
+        // Use String.valueOf() to safely convert proxy objects that Oracle may return
+        chunk.setId(String.valueOf(row[0]));
+        chunk.setChunkIndex(((Number) row[2]).intValue()); // Oracle may return as BigDecimal
 
-            // Create Document object with full information from the JOIN
-            Document document = new Document();
-            document.setId(convertToString(row[1]));
-            document.setTitle(convertToString(row[7]));
-            document.setCategory(convertToString(row[8]));
-
-            chunk.setDocument(document);
-
-            return chunk;
-        } catch (SQLException | IOException e) {
-            throw new RuntimeException("Failed to parse chunk from database row: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Convert Oracle result object to String
-     *
-     * Handles multiple Oracle return types:
-     * - String: Return as-is
-     * - CLOB: Read content as String (Oracle CLOB fields return as proxy objects)
-     * - null: Return null
-     *
-     * Oracle JDBC returns CLOB columns as oracle.sql.CLOB proxy objects,
-     * not as String values. We need to explicitly read the CLOB content.
-     *
-     * @param value Object from native query result (may be String, CLOB, or null)
-     * @return String value or null
-     * @throws SQLException if CLOB reading fails
-     * @throws IOException if CLOB stream reading fails
-     */
-    private String convertToString(Object value) throws SQLException, IOException {
-        if (value == null) {
-            return null;
+        // Handle CLOB content - Oracle may return as CLOB object or proxy
+        Object contentObj = row[3];
+        if (contentObj instanceof String) {
+            chunk.setContent((String) contentObj);
+        } else if (contentObj != null) {
+            chunk.setContent(String.valueOf(contentObj));
         }
 
-        // Already a String - return directly
-        if (value instanceof String) {
-            return (String) value;
-        }
+        // Create Document object with full information from the JOIN
+        Document document = new Document();
+        document.setId(String.valueOf(row[1]));
+        document.setTitle(row[7] != null ? String.valueOf(row[7]) : null);
+        document.setCategory(row[8] != null ? String.valueOf(row[8]) : null);
 
-        // Oracle CLOB - read content
-        if (value instanceof Clob) {
-            Clob clob = (Clob) value;
+        chunk.setDocument(document);
 
-            // Get character stream from CLOB
-            try (BufferedReader reader = new BufferedReader(clob.getCharacterStream())) {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (sb.length() > 0) {
-                        sb.append('\n');
-                    }
-                    sb.append(line);
-                }
-                return sb.toString();
-            }
-        }
-
-        // Try toString() as fallback (shouldn't happen, but safe)
-        return value.toString();
+        return chunk;
     }
 
     /**
