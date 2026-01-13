@@ -10,7 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -194,7 +198,7 @@ public class VectorSearchService {
      * 0: c.id
      * 1: c.document_id
      * 2: c.chunk_index
-     * 3: c.content
+     * 3: c.content (CLOB - needs special handling!)
      * 4: c.start_position
      * 5: c.end_position
      * 6: c.created_at
@@ -203,23 +207,75 @@ public class VectorSearchService {
      * 9: distance
      */
     private DocumentChunk parseChunkFromRow(Object[] row) {
-        // Create a basic DocumentChunk with the data we need
-        DocumentChunk chunk = new DocumentChunk();
+        try {
+            // Create a basic DocumentChunk with the data we need
+            DocumentChunk chunk = new DocumentChunk();
 
-        // Parse chunk fields (indices based on SELECT order)
-        chunk.setId((String) row[0]);
-        chunk.setChunkIndex(((Number) row[2]).intValue()); // Oracle may return as BigDecimal
-        chunk.setContent((String) row[3]);
+            // Parse chunk fields (indices based on SELECT order)
+            chunk.setId(convertToString(row[0]));
+            chunk.setChunkIndex(((Number) row[2]).intValue()); // Oracle may return as BigDecimal
+            chunk.setContent(convertToString(row[3])); // Handle CLOB
 
-        // Create Document object with full information from the JOIN
-        Document document = new Document();
-        document.setId((String) row[1]);
-        document.setTitle((String) row[7]);
-        document.setCategory((String) row[8]);
+            // Create Document object with full information from the JOIN
+            Document document = new Document();
+            document.setId(convertToString(row[1]));
+            document.setTitle(convertToString(row[7]));
+            document.setCategory(convertToString(row[8]));
 
-        chunk.setDocument(document);
+            chunk.setDocument(document);
 
-        return chunk;
+            return chunk;
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException("Failed to parse chunk from database row: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Convert Oracle result object to String
+     *
+     * Handles multiple Oracle return types:
+     * - String: Return as-is
+     * - CLOB: Read content as String (Oracle CLOB fields return as proxy objects)
+     * - null: Return null
+     *
+     * Oracle JDBC returns CLOB columns as oracle.sql.CLOB proxy objects,
+     * not as String values. We need to explicitly read the CLOB content.
+     *
+     * @param value Object from native query result (may be String, CLOB, or null)
+     * @return String value or null
+     * @throws SQLException if CLOB reading fails
+     * @throws IOException if CLOB stream reading fails
+     */
+    private String convertToString(Object value) throws SQLException, IOException {
+        if (value == null) {
+            return null;
+        }
+
+        // Already a String - return directly
+        if (value instanceof String) {
+            return (String) value;
+        }
+
+        // Oracle CLOB - read content
+        if (value instanceof Clob) {
+            Clob clob = (Clob) value;
+
+            // Get character stream from CLOB
+            try (BufferedReader reader = new BufferedReader(clob.getCharacterStream())) {
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (sb.length() > 0) {
+                        sb.append('\n');
+                    }
+                    sb.append(line);
+                }
+                return sb.toString();
+            }
+        }
+
+        // Try toString() as fallback (shouldn't happen, but safe)
+        return value.toString();
     }
 
     /**
