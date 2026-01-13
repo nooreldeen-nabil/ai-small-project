@@ -150,38 +150,39 @@ List<Object[]> findSimilarChunks(
 **Solution:** Modified `DocumentChunkRepository.findSimilarChunks()` to explicitly select columns instead of `c.*`, excluding the embedding column from SELECT results.
 
 ### Bug #2: CLOB Proxy Casting Error ✅ FIXED
-**Date:** Jan 13, 2026 (Current Session)
+**Commit:** `f0c5967`
+**Date:** Jan 13, 2026 (Session 5)
 **Issue:**
 ```
 Error: class jdk.proxy2.$Proxy180 cannot be cast to class java.lang.String
 Empty search results: {"results": [], "totalResults": 0}
 ```
 **Root Cause:** Oracle returns CLOB columns as `oracle.sql.CLOB` proxy objects, not Strings. Direct casting `(String) row[3]` failed.
-**Solution:** Added `convertToString()` helper method in `VectorSearchService.java` to properly read CLOB content using `CharacterStream`.
+**Solution:** Added `convertToString()` helper method in `VectorSearchService.java` to properly read CLOB content.
+
+### Bug #3: CLOB Content Truncation ✅ FIXED
+**Commit:** `f159609`
+**Date:** Jan 13, 2026 (Session 5)
+**Issue:**
+```json
+// Content truncated to ~150 chars instead of ~1000 chars
+"content": "he output layer produces results...Deep le"
+// Starts mid-word ("he") and ends mid-word ("le")
+```
+**Root Cause:** Using `BufferedReader.readLine()` for CLOB reading wasn't reliable - didn't read complete content.
+**Solution:** Changed to `clob.getSubString(1, length)` which reads the entire CLOB content directly in one operation.
 
 **Files Modified:**
 ```java
-// VectorSearchService.java
-+ import java.sql.Clob;
-+ import java.sql.SQLException;
-+ import java.io.BufferedReader;
-+ import java.io.IOException;
-
-+ private String convertToString(Object value) throws SQLException, IOException {
-+     if (value instanceof Clob) {
-+         Clob clob = (Clob) value;
-+         try (BufferedReader reader = new BufferedReader(clob.getCharacterStream())) {
-+             StringBuilder sb = new StringBuilder();
-+             String line;
-+             while ((line = reader.readLine()) != null) {
-+                 if (sb.length() > 0) sb.append('\n');
-+                 sb.append(line);
-+             }
-+             return sb.toString();
-+         }
-+     }
-+     return (String) value;
-+ }
+// VectorSearchService.java - Final CLOB reading approach
+private String convertToString(Object value) throws SQLException {
+    if (value instanceof Clob) {
+        Clob clob = (Clob) value;
+        long length = clob.length();
+        return clob.getSubString(1, (int) length);  // Oracle 1-based indexing
+    }
+    return (String) value;
+}
 ```
 
 ---
@@ -511,17 +512,19 @@ Similarity Score Range: [0, 1]
   - Updated VectorSearchService result parsing
 - **Commit:** `03fdaa3 Fix: Resolve Oracle JDBC VECTOR column handling in semantic search`
 
-### Session 5: Phase 3 Bug Fix #2 + Documentation (CURRENT)
+### Session 5: Phase 3 Bug Fixes #2 & #3 + Documentation (CURRENT)
 - **Date:** Jan 13, 2026 03:00+
 - **Work Done:**
-  - Fixed CLOB proxy casting error in VectorSearchService
-  - Added `convertToString()` method for proper CLOB handling
+  - Fixed CLOB proxy casting error (Bug #2)
+  - Fixed CLOB content truncation (Bug #3)
+  - Implemented proper CLOB reading with `getSubString()`
   - Created comprehensive PHASE-3-GUIDE.md (50KB)
   - Created CLAUDE.md session reference guide
-  - Ready for final testing and Phase 3 completion
-- **Commits:** (Pending after testing)
-  - Fix: Resolve CLOB proxy casting in semantic search
-  - Docs: Add comprehensive Phase 3 guide and Claude reference
+  - User tested semantic search - results working correctly
+  - Phase 3 fully functional and validated
+- **Commits:**
+  - `f0c5967` - Fix: Resolve CLOB proxy casting + Add comprehensive documentation
+  - `f159609` - Fix: Resolve CLOB content truncation using getSubString() method
 
 ---
 
@@ -698,21 +701,26 @@ Answer + Sources
 **✅ What's Working:**
 - All Phase 1 features (LLM integration)
 - All Phase 2 features (Prompt engineering)
-- All Phase 3 features (Vector database & semantic search)
+- All Phase 3 features (Vector database & semantic search) ⭐ FULLY TESTED
 - Docker environment (Oracle 23c)
 - Database schema with VECTOR support
-- CLOB proxy bug fixed (ready for testing)
+- Bug #1: JDBC VECTOR column handling ✅
+- Bug #2: CLOB proxy casting ✅
+- Bug #3: CLOB content truncation ✅
+- Semantic search returning full chunk content with correct similarity scores
 
-**⏳ What Needs Testing:**
-- Document upload with CLOB fix
-- Semantic search with CLOB fix
-- Full end-to-end flow validation
+**✅ Validated Features:**
+- Document upload with chunking (1000 chars, 200 overlap)
+- Embedding generation via Gemini (768 dimensions)
+- Semantic search with vector similarity
+- Similarity scores accurate (0.77-0.8 = 77-80% match)
+- Results ranked correctly by relevance
 
 **📝 What's Next:**
-1. User tests Phase 3 on local machine
-2. If tests pass → Commit fixes → Mark Phase 3 complete
-3. Start Phase 4 (RAG) planning
-4. Implement RAG pipeline
+1. ~~Test Phase 3~~ ✅ COMPLETE
+2. Mark Phase 3 as complete ✅
+3. Start Phase 4 (RAG) - Retrieval Augmented Generation
+4. Implement RAG pipeline (semantic search + LLM + citations)
 5. Create PHASE-4-GUIDE.md
 
 ---
@@ -784,34 +792,40 @@ A successful session should:
 
 **END OF CLAUDE.MD**
 
-*Last updated: 2026-01-13 - Session 5 - Phase 3 Bug Fix #2 + Documentation*
+*Last updated: 2026-01-13 - Session 5 - Phase 3 Complete (All Bugs Fixed & Tested)*
 
 ---
 
-## 🚀 READY TO CONTINUE?
+## 🎉 PHASE 3 COMPLETE!
 
-**Current Task:** Test Phase 3 with CLOB fix on local machine
-**Next Task:** Complete Phase 3 → Start Phase 4 (RAG)
+**Current Status:** ✅ Phase 3 FULLY TESTED & WORKING
+**Next Phase:** Phase 4 (RAG - Retrieval Augmented Generation)
 **Branch:** `claude/continue-llm-ai-mvp-xYiaT`
-**Status:** ✅ Code ready, ⏳ Testing pending
+**Latest Commits:**
+- `f0c5967` - CLOB proxy casting fix + Documentation
+- `f159609` - CLOB content truncation fix
 
-**Commands to run on your local machine:**
-```bash
-# 1. Pull latest changes
-git pull origin claude/continue-llm-ai-mvp-xYiaT
-
-# 2. Rebuild
-mvn clean package -DskipTests
-
-# 3. Restart application
-java -jar target/llm-agentic-ai-mvp-1.0.0-SNAPSHOT.jar
-
-# 4. Test semantic search
-curl -X POST http://localhost:8080/api/documents/search/semantic \
-  -H "Content-Type: application/json" \
-  -d '{"query": "How do AI models learn?", "topK": 5}'
-
-# 5. Should now return results (not empty)!
+**What Was Validated:**
+```json
+{
+  "query": "How do AI models learn?",
+  "results": [
+    {
+      "documentTitle": "Introduction to Neural Networks",
+      "chunkIndex": 2,
+      "content": "...full 1000 character chunks...",
+      "similarityScore": 0.8,
+      "category": "AI/ML"
+    }
+  ],
+  "totalResults": 3
+}
 ```
 
-**Need help?** Ask me anything! 🤖
+✅ Semantic search working
+✅ Full chunk content (no truncation)
+✅ Accurate similarity scores (0.77-0.8)
+✅ Results ranked by relevance
+✅ All 3 bugs fixed and tested
+
+**Ready for Phase 4!** 🚀
