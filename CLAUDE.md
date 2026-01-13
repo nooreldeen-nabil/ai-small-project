@@ -3,7 +3,7 @@
 **Project:** LLM Agentic AI MVP - 7-Phase Learning Project
 **Last Updated:** 2026-01-13
 **Current Phase:** Phase 3 (Vector Database & Embeddings) - COMPLETED ✅
-**Current Branch:** `claude/continue-llm-ai-mvp-xYiaT`
+**Current Branch:** `claude/develop-stable-nSxCU` (stable/default branch)
 
 ---
 
@@ -25,6 +25,21 @@
 | **Phase 5** | ⏳ Pending | Agentic AI - Tool Use (Function Calling) |
 | **Phase 6** | ⏳ Pending | Agentic AI - Camunda Workflows (BPMN) |
 | **Phase 7** | ⏳ Pending | Integration & Polish (Frontend + Demo) |
+
+### 🔀 Branch Structure
+
+**Default Branch:** `claude/develop-stable-nSxCU` (stable, production-ready code)
+
+**Historical Feature Branches:**
+- `claude/llm-agentic-ai-mvp-bRhG6` - Initial implementation (Phases 1-3 with bugs)
+- `claude/continue-llm-ai-mvp-xYiaT` - Bug fixes + Phase 3 completion
+
+**Branch Consolidation:** (Jan 13, 2026)
+The `claude/develop-stable-nSxCU` branch was created by consolidating the most stable code from both feature branches. It contains:
+- ✅ All Phase 1-3 implementations
+- ✅ All bug fixes (JDBC VECTOR, CLOB proxy, CLOB truncation)
+- ✅ Complete documentation (CLAUDE.md + PHASE-3-GUIDE.md)
+- ✅ Fully tested and validated code
 
 ---
 
@@ -311,8 +326,8 @@ git add .
 # Commit (only when requested!)
 git commit -m "Description"
 
-# Push to feature branch
-git push -u origin claude/continue-llm-ai-mvp-xYiaT
+# Push to stable branch
+git push -u origin claude/develop-stable-nSxCU
 ```
 
 ### Database
@@ -512,8 +527,9 @@ Similarity Score Range: [0, 1]
   - Updated VectorSearchService result parsing
 - **Commit:** `03fdaa3 Fix: Resolve Oracle JDBC VECTOR column handling in semantic search`
 
-### Session 5: Phase 3 Bug Fixes #2 & #3 + Documentation (CURRENT)
+### Session 5: Phase 3 Bug Fixes #2 & #3 + Documentation
 - **Date:** Jan 13, 2026 03:00+
+- **Branch:** `claude/continue-llm-ai-mvp-xYiaT`
 - **Work Done:**
   - Fixed CLOB proxy casting error (Bug #2)
   - Fixed CLOB content truncation (Bug #3)
@@ -526,12 +542,28 @@ Similarity Score Range: [0, 1]
   - `f0c5967` - Fix: Resolve CLOB proxy casting + Add comprehensive documentation
   - `f159609` - Fix: Resolve CLOB content truncation using getSubString() method
 
+### Session 6: Branch Consolidation (CURRENT)
+- **Date:** Jan 13, 2026
+- **Branch:** `claude/develop-stable-nSxCU` (newly created stable/default branch)
+- **Work Done:**
+  - Analyzed both feature branches (`claude/llm-agentic-ai-mvp-bRhG6` and `claude/continue-llm-ai-mvp-xYiaT`)
+  - Compared code differences - confirmed `claude/continue-llm-ai-mvp-xYiaT` most stable
+  - Created new `claude/develop-stable-nSxCU` branch from stable code
+  - Updated CLAUDE.md to reflect new branch structure
+  - Documented branch consolidation and repository structure
+  - Updated all git workflow instructions
+  - Prepared for Phase 4 (RAG) work
+- **Branch Status:**
+  - ✅ `claude/develop-stable-nSxCU` - Stable/default branch (production-ready)
+  - 📦 `claude/llm-agentic-ai-mvp-bRhG6` - Historical (kept for reference)
+  - 📦 `claude/continue-llm-ai-mvp-xYiaT` - Historical (kept for reference)
+
 ---
 
 ## ⚠️ Important Notes for Future Sessions
 
 ### DO NOT
-- ❌ Push to `main` branch - Always use feature branches
+- ❌ Push directly to `claude/develop-stable-nSxCU` without testing - Create feature branches for new work
 - ❌ Commit without explicit user request
 - ❌ Create PRs without user confirmation
 - ❌ Run destructive operations (force push, hard reset)
@@ -542,15 +574,18 @@ Similarity Score Range: [0, 1]
 - ✅ Always check `git status` first
 - ✅ Read this CLAUDE.md file completely
 - ✅ Read the current phase guide (PHASE-X-GUIDE.md)
-- ✅ Use feature branch: `claude/continue-llm-ai-mvp-xYiaT`
+- ✅ Work on `claude/develop-stable-nSxCU` branch for stable work, or create feature branches for experimental work
 - ✅ Test thoroughly before committing
 - ✅ Update this CLAUDE.md at end of session
 - ✅ Document any new bugs/fixes clearly
 
 ### Git Workflow
 ```bash
-# ALWAYS develop on feature branch
-git checkout claude/continue-llm-ai-mvp-xYiaT
+# Check current branch
+git status
+
+# Work on stable branch (stable work)
+git checkout claude/develop-stable-nSxCU
 
 # Stage changes
 git add <files>
@@ -558,8 +593,11 @@ git add <files>
 # Commit (only when user requests)
 git commit -m "Clear, descriptive message"
 
-# Push to feature branch
-git push -u origin claude/continue-llm-ai-mvp-xYiaT
+# Push to develop
+git push -u origin develop
+
+# For new features, create feature branch
+git checkout -b claude/feature-name-sessionId
 
 # Create PR (only when user requests)
 gh pr create --title "Title" --body "Description"
@@ -755,9 +793,9 @@ Answer + Sources
 
 ## 📞 Quick Reference
 
-**Project Repository:** (Add GitHub URL when available)
-**Main Branch:** `main`
-**Feature Branch:** `claude/continue-llm-ai-mvp-xYiaT`
+**Project Repository:** nooreldeen-nabil/ai-small-project
+**Default Branch:** `claude/develop-stable-nSxCU` (stable/production-ready)
+**Historical Branches:** `claude/llm-agentic-ai-mvp-bRhG6`, `claude/continue-llm-ai-mvp-xYiaT`
 **Local Server:** http://localhost:8080
 **Swagger UI:** http://localhost:8080/swagger-ui.html
 **Database:** localhost:1521/FREEPDB1 (ai_user/ai_password_2024)
@@ -792,7 +830,7 @@ A successful session should:
 
 **END OF CLAUDE.MD**
 
-*Last updated: 2026-01-13 - Session 5 - Phase 3 Complete (All Bugs Fixed & Tested)*
+*Last updated: 2026-01-13 - Session 6 - Branch Consolidation*
 
 ---
 
@@ -800,10 +838,11 @@ A successful session should:
 
 **Current Status:** ✅ Phase 3 FULLY TESTED & WORKING
 **Next Phase:** Phase 4 (RAG - Retrieval Augmented Generation)
-**Branch:** `claude/continue-llm-ai-mvp-xYiaT`
+**Branch:** `claude/develop-stable-nSxCU` (stable/default)
 **Latest Commits:**
 - `f0c5967` - CLOB proxy casting fix + Documentation
 - `f159609` - CLOB content truncation fix
+- Branch consolidation completed (Jan 13, 2026)
 
 **What Was Validated:**
 ```json
