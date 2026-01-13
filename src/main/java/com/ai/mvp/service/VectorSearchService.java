@@ -207,15 +207,23 @@ public class VectorSearchService {
         DocumentChunk chunk = new DocumentChunk();
 
         // Parse chunk fields (indices based on SELECT order)
-        chunk.setId((String) row[0]);
+        // Use String.valueOf() to safely convert proxy objects that Oracle may return
+        chunk.setId(String.valueOf(row[0]));
         chunk.setChunkIndex(((Number) row[2]).intValue()); // Oracle may return as BigDecimal
-        chunk.setContent((String) row[3]);
+
+        // Handle CLOB content - Oracle may return as CLOB object or proxy
+        Object contentObj = row[3];
+        if (contentObj instanceof String) {
+            chunk.setContent((String) contentObj);
+        } else if (contentObj != null) {
+            chunk.setContent(String.valueOf(contentObj));
+        }
 
         // Create Document object with full information from the JOIN
         Document document = new Document();
-        document.setId((String) row[1]);
-        document.setTitle((String) row[7]);
-        document.setCategory((String) row[8]);
+        document.setId(String.valueOf(row[1]));
+        document.setTitle(row[7] != null ? String.valueOf(row[7]) : null);
+        document.setCategory(row[8] != null ? String.valueOf(row[8]) : null);
 
         chunk.setDocument(document);
 
