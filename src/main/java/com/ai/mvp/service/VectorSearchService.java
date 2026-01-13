@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.SQLException;
@@ -225,7 +223,7 @@ public class VectorSearchService {
             chunk.setDocument(document);
 
             return chunk;
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new RuntimeException("Failed to parse chunk from database row: " + e.getMessage(), e);
         }
     }
@@ -241,12 +239,14 @@ public class VectorSearchService {
      * Oracle JDBC returns CLOB columns as oracle.sql.CLOB proxy objects,
      * not as String values. We need to explicitly read the CLOB content.
      *
+     * Uses getSubString() for efficient CLOB reading - reads entire content at once
+     * instead of streaming line-by-line.
+     *
      * @param value Object from native query result (may be String, CLOB, or null)
      * @return String value or null
      * @throws SQLException if CLOB reading fails
-     * @throws IOException if CLOB stream reading fails
      */
-    private String convertToString(Object value) throws SQLException, IOException {
+    private String convertToString(Object value) throws SQLException {
         if (value == null) {
             return null;
         }
@@ -256,22 +256,19 @@ public class VectorSearchService {
             return (String) value;
         }
 
-        // Oracle CLOB - read content
+        // Oracle CLOB - read full content
         if (value instanceof Clob) {
             Clob clob = (Clob) value;
 
-            // Get character stream from CLOB
-            try (BufferedReader reader = new BufferedReader(clob.getCharacterStream())) {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (sb.length() > 0) {
-                        sb.append('\n');
-                    }
-                    sb.append(line);
-                }
-                return sb.toString();
+            // Use getSubString for direct CLOB reading (more efficient and reliable)
+            long length = clob.length();
+            if (length == 0) {
+                return "";
             }
+
+            // Oracle CLOB uses 1-based indexing
+            // Read entire CLOB content at once
+            return clob.getSubString(1, (int) length);
         }
 
         // Try toString() as fallback (shouldn't happen, but safe)
