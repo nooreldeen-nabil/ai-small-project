@@ -188,11 +188,19 @@ public class VectorSearchService {
     /**
      * Parse DocumentChunk from native query result row
      *
-     * Oracle native query returns all chunk columns plus distance.
-     * We need to reconstruct the DocumentChunk entity from these columns.
+     * Oracle native query returns chunk columns, document columns, and distance.
      *
      * Column order matches the SELECT statement in DocumentChunkRepository:
-     * c.id, c.document_id, c.chunk_index, c.content, c.embedding, c.start_position, c.end_position, c.created_at
+     * 0: c.id
+     * 1: c.document_id
+     * 2: c.chunk_index
+     * 3: c.content
+     * 4: c.start_position
+     * 5: c.end_position
+     * 6: c.created_at
+     * 7: d.title
+     * 8: d.category
+     * 9: distance
      */
     private DocumentChunk parseChunkFromRow(Object[] row) {
         // Create a basic DocumentChunk with the data we need
@@ -200,16 +208,14 @@ public class VectorSearchService {
 
         // Parse chunk fields (indices based on SELECT order)
         chunk.setId((String) row[0]);
-        chunk.setChunkIndex((Integer) row[2]);
+        chunk.setChunkIndex(((Number) row[2]).intValue()); // Oracle may return as BigDecimal
         chunk.setContent((String) row[3]);
 
-        // We need the document info too - create a minimal Document object
+        // Create Document object with full information from the JOIN
         Document document = new Document();
         document.setId((String) row[1]);
-
-        // Note: We'll need to fetch the full document to get title and category
-        // For now, we'll rely on the JOIN in the query to have this data available
-        // If Oracle query returns additional document columns, they would be here
+        document.setTitle((String) row[7]);
+        document.setCategory((String) row[8]);
 
         chunk.setDocument(document);
 

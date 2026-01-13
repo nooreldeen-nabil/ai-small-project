@@ -38,10 +38,18 @@ public interface DocumentChunkRepository extends JpaRepository<DocumentChunk, St
      * Oracle VECTOR_DISTANCE syntax:
      * VECTOR_DISTANCE(vector1, vector2, COSINE)
      *
-     * Note: We convert the embedding string to VECTOR type using TO_VECTOR()
+     * Note: We explicitly select columns EXCLUDING embedding to avoid JDBC VECTOR conversion issues
      */
     @Query(value = """
-            SELECT c.*,
+            SELECT c.id,
+                   c.document_id,
+                   c.chunk_index,
+                   c.content,
+                   c.start_position,
+                   c.end_position,
+                   c.created_at,
+                   d.title,
+                   d.category,
                    VECTOR_DISTANCE(TO_VECTOR(c.embedding), TO_VECTOR(:queryEmbedding), COSINE) as distance
             FROM document_chunks c
             JOIN documents d ON c.document_id = d.id
