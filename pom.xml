@@ -112,24 +112,22 @@
         </dependency>
 
         <!-- ============================================================ -->
-        <!-- Camunda Platform 8 -->
+        <!-- Camunda Platform 8 - Phase 6 Integration -->
         <!-- ============================================================ -->
-        <!-- NOTE: Camunda dependencies commented out for Phase 1
-             Will be properly configured in Phase 6 when we need workflow orchestration -->
 
-        <!--
+        <!-- Zeebe Client - Connect to Zeebe workflow engine -->
         <dependency>
             <groupId>io.camunda</groupId>
             <artifactId>zeebe-client-java</artifactId>
-            <version>${camunda.version}</version>
+            <version>8.7.21</version>
         </dependency>
 
+        <!-- Zeebe Spring Boot Starter - Job workers and auto-configuration -->
         <dependency>
-            <groupId>io.camunda.spring</groupId>
-            <artifactId>spring-boot-starter-camunda</artifactId>
-            <version>${camunda.version}</version>
+            <groupId>io.camunda</groupId>
+            <artifactId>spring-zeebe-starter</artifactId>
+            <version>8.7.0</version>
         </dependency>
-        -->
 
         <!-- ============================================================ -->
         <!-- HTTP Client for API Calls -->
