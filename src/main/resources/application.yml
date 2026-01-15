@@ -110,15 +110,15 @@ camunda:
   client:
     # Mode: self-managed (for local docker-compose setup)
     mode: self-managed
+    # Authentication (required by SDK even if not actively used)
+    auth:
+      client-id: zeebe
+      client-secret: zecret
+      token-url: http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/token
+    # Zeebe client configuration
     zeebe:
-      # Enable Zeebe client
-      enabled: true
-      # Zeebe gateway gRPC address (must be absolute URI with scheme)
-      grpc-address: ${CAMUNDA_ZEEBE_GATEWAY:http://localhost:26500}
-      # Zeebe REST API address
-      rest-address: ${CAMUNDA_ZEEBE_REST:http://localhost:8080}
-      # Use plaintext (no TLS) for local development
-      use-plaintext-connection: true
+      # Zeebe gateway gRPC address
+      grpc-address: http://localhost:26500
       # Worker configuration
       max-jobs-active: 32
       default-job-worker-name: ai-mvp-worker
