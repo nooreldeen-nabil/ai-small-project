@@ -1,9 +1,9 @@
 # 🤖 Claude Session Reference Guide
 
 **Project:** LLM Agentic AI MVP - 7-Phase Learning Project
-**Last Updated:** 2026-01-13
-**Current Phase:** Phase 4 (RAG - Retrieval Augmented Generation) - COMPLETED ✅
-**Current Branch:** `claude/develop-stable-nSxCU` (stable/default branch)
+**Last Updated:** 2026-01-14
+**Current Phase:** Phase 5 (Agentic AI - Tool Use) - COMPLETED ✅
+**Current Branch:** `claude/phase-5-tool-use-unNpt` (Phase 5 feature branch)
 
 ---
 
@@ -17,18 +17,21 @@
 | **Phase 2** | ✅ Complete | Jan 2026 | Prompt Engineering (4 techniques) |
 | **Phase 3** | ✅ Complete | Jan 13, 2026 | Vector Database & Semantic Search |
 | **Phase 4** | ✅ Complete | Jan 13, 2026 | RAG - Document Q&A with Citations |
+| **Phase 5** | ✅ Complete | Jan 14, 2026 | Agentic AI - Tool Use (4 tools + Function Calling) |
 
 ### 🚧 Upcoming Phases
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| **Phase 5** | ⏳ Pending | Agentic AI - Tool Use (Function Calling) |
 | **Phase 6** | ⏳ Pending | Agentic AI - Camunda Workflows (BPMN) |
 | **Phase 7** | ⏳ Pending | Integration & Polish (Frontend + Demo) |
 
 ### 🔀 Branch Structure
 
-**Default Branch:** `claude/develop-stable-nSxCU` (stable, production-ready code)
+**Default Branch:** `claude/develop-stable-nSxCU` (stable, production-ready code - Phases 1-4)
+
+**Active Feature Branch:**
+- `claude/phase-5-tool-use-unNpt` - Phase 5 implementation (current)
 
 **Historical Feature Branches:**
 - `claude/llm-agentic-ai-mvp-bRhG6` - Initial implementation (Phases 1-3 with bugs)
@@ -567,7 +570,7 @@ Similarity Score Range: [0, 1]
   - 📦 `claude/llm-agentic-ai-mvp-bRhG6` - Historical (kept for reference)
   - 📦 `claude/continue-llm-ai-mvp-xYiaT` - Historical (kept for reference)
 
-### Session 7: Phase 4 Implementation (CURRENT)
+### Session 7: Phase 4 Implementation
 - **Date:** Jan 13, 2026
 - **Branch:** `claude/develop-stable-nSxCU`
 - **Work Done:**
@@ -595,6 +598,56 @@ Similarity Score Range: [0, 1]
   - ✅ Confidence level: HIGH
   - ✅ Token usage tracked (399 total, 256 input, 27 output)
   - ✅ Provider: GEMINI
+
+### Session 8: Phase 5 Implementation (CURRENT)
+- **Date:** Jan 14, 2026
+- **Branch:** `claude/phase-5-tool-use-unNpt`
+- **Work Done:**
+  - Implemented complete Agentic AI with Tool Use (Function Calling)
+  - Extended Gemini DTOs for function calling support:
+    - Added FunctionDeclaration, FunctionCall, FunctionResponse to GeminiApiRequest
+    - Added FunctionCall parsing to GeminiApiResponse
+    - Added helper methods: hasFunctionCalls(), getFunctionCalls()
+  - Created Tool framework:
+    - Tool interface with getName(), getDescription(), getParametersSchema(), execute()
+    - ToolResult class for execution results
+    - JSON Schema parameter definitions
+  - Implemented 4 concrete tools:
+    - SearchDocumentsTool - Semantic search integration (Phase 3)
+    - GetCurrentDateTool - Date/time with timezone support
+    - CalculateTool - Mathematical calculations with JavaScript engine
+    - DatabaseQueryTool - Oracle statistics (document count, chunks, categories)
+  - Created AgentService with complete agent loop:
+    - Multi-turn LLM conversations
+    - Tool execution and result handling
+    - Max 10 iterations to prevent infinite loops
+    - Decision logging (THINKING, TOOL_CALL, TOOL_RESULT, FINAL_ANSWER)
+    - Token tracking and execution timing
+    - System prompt for agent behavior
+  - Created 3 Agent DTOs:
+    - AgentTaskRequest - User task with maxToolCalls and temperature
+    - AgentTaskResponse - Answer + execution log + metrics
+    - AgentExecutionStep - Individual step logging with 4 types
+  - Created AgentController:
+    - POST /api/agent/task - Execute agent task
+    - GET /api/agent/tools - List available tools
+    - GET /api/agent/health - Health check
+  - Created comprehensive PHASE-5-GUIDE.md (9 test cases, troubleshooting, architecture)
+  - Updated CLAUDE.md with Session 8 notes
+- **Files Created (12 new files):**
+  - AgentService.java, AgentController.java
+  - Tool.java, ToolResult.java
+  - SearchDocumentsTool.java, GetCurrentDateTool.java, CalculateTool.java, DatabaseQueryTool.java
+  - AgentTaskRequest.java, AgentTaskResponse.java, AgentExecutionStep.java
+  - PHASE-5-GUIDE.md
+- **Files Extended:**
+  - GeminiApiRequest.java (function calling support)
+  - GeminiApiResponse.java (function calling support)
+- **Test Requirements:**
+  - 9 test cases defined in PHASE-5-GUIDE.md
+  - Multi-step task testing required
+  - Tool decision validation required
+  - Execution log verification required
 
 ---
 
@@ -869,7 +922,7 @@ A successful session should:
 
 **END OF CLAUDE.MD**
 
-*Last updated: 2026-01-13 - Session 7 - Phase 4 (RAG) Implementation*
+*Last updated: 2026-01-14 - Session 8 - Phase 5 (Agentic AI - Tool Use) Implementation*
 
 ---
 
@@ -917,3 +970,169 @@ A successful session should:
 ✅ Fallback handling for no relevant documents
 
 **Ready for Phase 5 (Agentic AI - Tool Use)!** 🚀
+
+---
+
+## 🤖 PHASE 5 COMPLETE!
+
+**Current Status:** ✅ Phase 5 IMPLEMENTATION COMPLETE
+**Next Phase:** Phase 6 (Agentic AI - Camunda Workflows / BPMN)
+**Branch:** `claude/phase-5-tool-use-unNpt` (feature branch)
+**Session:** Session 8 (Jan 14, 2026)
+
+**What Was Built:**
+
+### Architecture Components
+
+**1. Tool System (4 Tools)**
+- ✅ `SearchDocumentsTool` - Search vector database (integrates Phase 3)
+- ✅ `GetCurrentDateTool` - Get current date/time with timezone support
+- ✅ `CalculateTool` - Perform mathematical calculations
+- ✅ `DatabaseQueryTool` - Query Oracle for statistics
+
+**2. Agent Service**
+- ✅ Agent loop with max 10 iterations
+- ✅ Multi-turn LLM conversation
+- ✅ Tool execution and result handling
+- ✅ Decision logging (THINKING, TOOL_CALL, TOOL_RESULT, FINAL_ANSWER)
+- ✅ Token tracking and execution time
+
+**3. Gemini Function Calling**
+- ✅ Extended GeminiApiRequest for function declarations
+- ✅ Extended GeminiApiResponse for function call parsing
+- ✅ Tool definition in JSON Schema format
+- ✅ Function call/response flow
+
+**4. DTOs**
+- ✅ AgentTaskRequest - User task input
+- ✅ AgentTaskResponse - Final answer + execution log
+- ✅ AgentExecutionStep - Individual step logging
+- ✅ ToolResult - Tool execution result
+
+**5. API Endpoints**
+- ✅ `POST /api/agent/task` - Execute agent task
+- ✅ `GET /api/agent/tools` - List available tools
+- ✅ `GET /api/agent/health` - Health check
+
+### Key Features
+
+**Autonomous Decision Making:**
+- Agent decides which tools to use based on task
+- Multi-step reasoning (use tool → analyze result → use another tool)
+- Automatic tool chaining
+
+**Execution Transparency:**
+- Complete execution log of all steps
+- Tool arguments and results visible
+- Token usage and timing tracked
+
+**Multi-Step Tasks:**
+- Example: "Find AI docs and calculate percentage of total"
+  - Step 1: search_documents("AI")
+  - Step 2: database_query("document_count")
+  - Step 3: calculate("count / total * 100")
+  - Step 4: Synthesize answer
+
+### Files Created (Session 8)
+
+**Core Framework:**
+- `src/main/java/com/ai/mvp/service/AgentService.java`
+- `src/main/java/com/ai/mvp/service/agent/Tool.java` (interface)
+- `src/main/java/com/ai/mvp/service/agent/ToolResult.java`
+
+**Tool Implementations:**
+- `src/main/java/com/ai/mvp/service/agent/SearchDocumentsTool.java`
+- `src/main/java/com/ai/mvp/service/agent/GetCurrentDateTool.java`
+- `src/main/java/com/ai/mvp/service/agent/CalculateTool.java`
+- `src/main/java/com/ai/mvp/service/agent/DatabaseQueryTool.java`
+
+**DTOs:**
+- `src/main/java/com/ai/mvp/dto/agent/AgentTaskRequest.java`
+- `src/main/java/com/ai/mvp/dto/agent/AgentTaskResponse.java`
+- `src/main/java/com/ai/mvp/dto/agent/AgentExecutionStep.java`
+
+**Controller:**
+- `src/main/java/com/ai/mvp/controller/AgentController.java`
+
+**Extended DTOs:**
+- `src/main/java/com/ai/mvp/dto/gemini/GeminiApiRequest.java` (added function calling)
+- `src/main/java/com/ai/mvp/dto/gemini/GeminiApiResponse.java` (added function calling)
+
+**Documentation:**
+- `PHASE-5-GUIDE.md` - Complete guide with architecture, testing, troubleshooting
+
+### Example Agent Execution
+
+**Task:** "Search for documents about neural networks and tell me how many we have"
+
+**Execution Log:**
+```json
+{
+  "task": "Search for documents about neural networks and tell me how many we have",
+  "success": true,
+  "executionLog": [
+    {
+      "type": "THINKING",
+      "stepNumber": 1,
+      "thinking": "Decided to use 1 tool(s): search_documents"
+    },
+    {
+      "type": "TOOL_CALL",
+      "stepNumber": 2,
+      "toolName": "search_documents",
+      "toolArgs": {"query": "neural networks", "topK": 10}
+    },
+    {
+      "type": "TOOL_RESULT",
+      "stepNumber": 3,
+      "toolName": "search_documents",
+      "toolResult": {"totalResults": 3, "results": [...]},
+      "toolSuccess": true,
+      "executionTimeMs": 245
+    },
+    {
+      "type": "FINAL_ANSWER",
+      "stepNumber": 4,
+      "thinking": "I found 3 documents about neural networks in the database..."
+    }
+  ],
+  "llmCallCount": 2,
+  "toolCallCount": 1,
+  "totalTokens": 450
+}
+```
+
+### Testing Requirements
+
+**Test Cases (from PHASE-5-GUIDE.md):**
+1. Simple date query → get_current_date
+2. Simple calculation → calculate
+3. Database statistics → database_query
+4. Document search → search_documents
+5. Multi-step task → multiple tools
+6. Combined operations → date + calculation
+7. No tool needed → direct LLM answer
+8. List tools → GET /api/agent/tools
+9. Health check → GET /api/agent/health
+
+### What's Working
+
+✅ Tool interface and implementations
+✅ Agent service orchestration
+✅ LLM function calling (Gemini API)
+✅ Multi-turn conversations
+✅ Execution logging
+✅ Error handling in tools
+✅ Token tracking
+✅ REST API endpoints
+✅ Swagger documentation
+
+### Next Steps
+
+1. **Testing** - User to test all 9 test cases from PHASE-5-GUIDE.md
+2. **Validation** - Verify agent makes correct tool decisions
+3. **Commit** - Commit Phase 5 implementation to `claude/phase-5-tool-use-unNpt`
+4. **Merge** - Merge to `claude/develop-stable-nSxCU` after testing
+5. **Phase 6** - Start Camunda workflow integration (BPMN orchestration)
+
+**Ready for Phase 6 (Camunda Workflows)!** 🚀

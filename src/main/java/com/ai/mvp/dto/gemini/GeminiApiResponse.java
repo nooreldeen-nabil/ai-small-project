@@ -105,6 +105,33 @@ public class GeminiApiResponse {
          */
         @JsonProperty("text")
         private String text;
+
+        /**
+         * Function call (when LLM wants to call a function)
+         */
+        @JsonProperty("functionCall")
+        private FunctionCall functionCall;
+    }
+
+    /**
+     * Function call from LLM
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FunctionCall {
+        /**
+         * Function name to call
+         */
+        @JsonProperty("name")
+        private String name;
+
+        /**
+         * Function arguments (JSON object)
+         */
+        @JsonProperty("args")
+        private Object args;
     }
 
     /**
@@ -164,10 +191,45 @@ public class GeminiApiResponse {
             if (firstCandidate.getContent() != null &&
                 firstCandidate.getContent().getParts() != null &&
                 !firstCandidate.getContent().getParts().isEmpty()) {
-                return firstCandidate.getContent().getParts().get(0).getText();
+                Part firstPart = firstCandidate.getContent().getParts().get(0);
+                if (firstPart.getText() != null) {
+                    return firstPart.getText();
+                }
             }
         }
         return "";
+    }
+
+    /**
+     * Helper method to check if response contains function calls
+     */
+    public boolean hasFunctionCalls() {
+        if (candidates != null && !candidates.isEmpty()) {
+            Candidate firstCandidate = candidates.get(0);
+            if (firstCandidate.getContent() != null &&
+                firstCandidate.getContent().getParts() != null) {
+                return firstCandidate.getContent().getParts().stream()
+                        .anyMatch(part -> part.getFunctionCall() != null);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Helper method to get all function calls from the response
+     */
+    public List<FunctionCall> getFunctionCalls() {
+        if (candidates != null && !candidates.isEmpty()) {
+            Candidate firstCandidate = candidates.get(0);
+            if (firstCandidate.getContent() != null &&
+                firstCandidate.getContent().getParts() != null) {
+                return firstCandidate.getContent().getParts().stream()
+                        .filter(part -> part.getFunctionCall() != null)
+                        .map(Part::getFunctionCall)
+                        .toList();
+            }
+        }
+        return List.of();
     }
 
     /**

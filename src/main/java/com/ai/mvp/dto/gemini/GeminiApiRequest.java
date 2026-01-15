@@ -48,6 +48,12 @@ public class GeminiApiRequest {
     private Content systemInstruction;
 
     /**
+     * Optional: Tool declarations for function calling
+     */
+    @JsonProperty("tools")
+    private List<Tool> tools;
+
+    /**
      * Content object containing parts
      */
     @Data
@@ -81,6 +87,18 @@ public class GeminiApiRequest {
          */
         @JsonProperty("text")
         private String text;
+
+        /**
+         * Function call (when LLM wants to call a function)
+         */
+        @JsonProperty("functionCall")
+        private FunctionCall functionCall;
+
+        /**
+         * Function response (when we send function results back)
+         */
+        @JsonProperty("functionResponse")
+        private FunctionResponse functionResponse;
     }
 
     /**
@@ -135,5 +153,89 @@ public class GeminiApiRequest {
          */
         @JsonProperty("topK")
         private Integer topK;
+    }
+
+    /**
+     * Tool definition for function calling
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Tool {
+        /**
+         * Function declarations
+         */
+        @JsonProperty("functionDeclarations")
+        private List<FunctionDeclaration> functionDeclarations;
+    }
+
+    /**
+     * Function declaration
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FunctionDeclaration {
+        /**
+         * Function name
+         */
+        @JsonProperty("name")
+        private String name;
+
+        /**
+         * Function description
+         */
+        @JsonProperty("description")
+        private String description;
+
+        /**
+         * Function parameters (JSON Schema)
+         */
+        @JsonProperty("parameters")
+        private Object parameters;
+    }
+
+    /**
+     * Function call (LLM requesting to call a function)
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FunctionCall {
+        /**
+         * Function name to call
+         */
+        @JsonProperty("name")
+        private String name;
+
+        /**
+         * Function arguments (JSON object)
+         */
+        @JsonProperty("args")
+        private Object args;
+    }
+
+    /**
+     * Function response (result of function execution)
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FunctionResponse {
+        /**
+         * Function name that was called
+         */
+        @JsonProperty("name")
+        private String name;
+
+        /**
+         * Function result
+         */
+        @JsonProperty("response")
+        private Object response;
     }
 }
