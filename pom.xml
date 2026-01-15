@@ -38,7 +38,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency Versions -->
-        <camunda.version>8.7.0</camunda.version>
+        <camunda-sdk.version>8.7.8</camunda-sdk.version>
+        <zeebe-client.version>8.7.21</zeebe-client.version>
         <oracle.version>23.6.0.24.10</oracle.version>
         <lombok.version>1.18.30</lombok.version>
         <openapi.version>2.3.0</openapi.version>
@@ -119,14 +120,14 @@
         <dependency>
             <groupId>io.camunda</groupId>
             <artifactId>zeebe-client-java</artifactId>
-            <version>8.7.21</version>
+            <version>${zeebe-client.version}</version>
         </dependency>
 
-        <!-- Zeebe Spring Boot Starter - Job workers and auto-configuration -->
+        <!-- Camunda SDK Spring Boot Starter - Job workers and auto-configuration -->
         <dependency>
             <groupId>io.camunda</groupId>
-            <artifactId>spring-zeebe-starter</artifactId>
-            <version>8.7.0</version>
+            <artifactId>spring-boot-starter-camunda-sdk</artifactId>
+            <version>${camunda-sdk.version}</version>
         </dependency>
 
         <!-- ============================================================ -->
