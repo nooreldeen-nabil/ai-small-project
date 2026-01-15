@@ -106,20 +106,19 @@ vector:
 # ============================================================================
 # Camunda Platform 8 / Zeebe Configuration - Phase 6
 # ============================================================================
-zeebe:
-  client:
-    broker:
-      gateway-address: ${CAMUNDA_ZEEBE_GATEWAY:localhost:26500}
-    security:
-      plaintext: true  # No authentication for development
-    worker:
-      max-jobs-active: 32
-      threads: 2
-      default-name: ai-mvp-worker
-      default-type: ai-task
-
-# Camunda UI URLs (for reference)
 camunda:
+  client:
+    zeebe:
+      # Zeebe gateway gRPC address (must be absolute URI)
+      grpc-address: ${CAMUNDA_ZEEBE_GATEWAY:http://localhost:26500}
+      # Use plaintext (no TLS) for local development
+      use-plaintext-connection: true
+      # Worker configuration
+      max-jobs-active: 32
+      default-job-worker-name: ai-mvp-worker
+      num-job-worker-execution-threads: 2
+
+  # Camunda UI URLs (for reference)
   operate:
     base-url: ${CAMUNDA_OPERATE_URL:http://localhost:8081}
   tasklist:
