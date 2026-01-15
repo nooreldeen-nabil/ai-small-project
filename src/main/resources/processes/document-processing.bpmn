@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   id="Definitions_1"
+                   targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="document-processing" name="Document Processing Workflow" isExecutable="true">
+
+    <!-- Start Event -->
+    <bpmn:startEvent id="StartEvent_1" name="Document Received">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Classification Task -->
+    <bpmn:serviceTask id="Task_Classification" name="Classify Document">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="classify-document" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Exclusive Gateway - Check Confidence -->
+    <bpmn:exclusiveGateway id="Gateway_Confidence" name="High Confidence?">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_HighConfidence</bpmn:outgoing>
+      <bpmn:outgoing>Flow_LowConfidence</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- High Confidence Path - Data Extraction -->
+    <bpmn:serviceTask id="Task_DataExtraction" name="Extract Data">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="extract-data" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_HighConfidence</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Low Confidence Path - Manual Review (Simulated) -->
+    <bpmn:serviceTask id="Task_ManualReview" name="Request Manual Review">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="manual-review" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_LowConfidence</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Parallel Gateway - Split -->
+    <bpmn:parallelGateway id="Gateway_Split" name="Split">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- Save Document Task -->
+    <bpmn:serviceTask id="Task_SaveDocument" name="Save Document">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="save-document" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Send Notification Task -->
+    <bpmn:serviceTask id="Task_SendNotification" name="Send Notification">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="send-notification" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Parallel Gateway - Join -->
+    <bpmn:parallelGateway id="Gateway_Join" name="Join">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- End Event -->
+    <bpmn:endEvent id="EndEvent_1" name="Document Processed">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_Classification" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Classification" targetRef="Gateway_Confidence" />
+
+    <bpmn:sequenceFlow id="Flow_HighConfidence" name="confidence >= 0.8" sourceRef="Gateway_Confidence" targetRef="Task_DataExtraction">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=confidence >= 0.8</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_LowConfidence" name="confidence < 0.8" sourceRef="Gateway_Confidence" targetRef="Task_ManualReview">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=confidence < 0.8</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_DataExtraction" targetRef="Gateway_Split" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_ManualReview" targetRef="Gateway_Split" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Gateway_Split" targetRef="Task_SaveDocument" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Gateway_Split" targetRef="Task_SendNotification" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_SaveDocument" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_SendNotification" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Gateway_Join" targetRef="EndEvent_1" />
+
+  </bpmn:process>
+
+  <!-- Diagram Information (positions for visual layout) -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="document-processing">
+
+      <!-- Start Event -->
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="135" y="225" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Classification Task -->
+      <bpmndi:BPMNShape id="Task_Classification_di" bpmnElement="Task_Classification">
+        <dc:Bounds x="240" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Exclusive Gateway -->
+      <bpmndi:BPMNShape id="Gateway_Confidence_di" bpmnElement="Gateway_Confidence" isMarkerVisible="true">
+        <dc:Bounds x="395" y="175" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="385" y="232" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Data Extraction Task (High Confidence) -->
+      <bpmndi:BPMNShape id="Task_DataExtraction_di" bpmnElement="Task_DataExtraction">
+        <dc:Bounds x="500" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Manual Review Task (Low Confidence) -->
+      <bpmndi:BPMNShape id="Task_ManualReview_di" bpmnElement="Task_ManualReview">
+        <dc:Bounds x="500" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Parallel Gateway Split -->
+      <bpmndi:BPMNShape id="Gateway_Split_di" bpmnElement="Gateway_Split">
+        <dc:Bounds x="665" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- Save Document Task -->
+      <bpmndi:BPMNShape id="Task_SaveDocument_di" bpmnElement="Task_SaveDocument">
+        <dc:Bounds x="770" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Send Notification Task -->
+      <bpmndi:BPMNShape id="Task_SendNotification_di" bpmnElement="Task_SendNotification">
+        <dc:Bounds x="770" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Parallel Gateway Join -->
+      <bpmndi:BPMNShape id="Gateway_Join_di" bpmnElement="Gateway_Join">
+        <dc:Bounds x="935" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- End Event -->
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="1042" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1025" y="225" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Sequence Flow Edges -->
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="188" y="200" />
+        <di:waypoint x="240" y="200" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="340" y="200" />
+        <di:waypoint x="395" y="200" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_HighConfidence_di" bpmnElement="Flow_HighConfidence">
+        <di:waypoint x="420" y="175" />
+        <di:waypoint x="420" y="120" />
+        <di:waypoint x="500" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="415" y="92" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_LowConfidence_di" bpmnElement="Flow_LowConfidence">
+        <di:waypoint x="420" y="225" />
+        <di:waypoint x="420" y="280" />
+        <di:waypoint x="500" y="280" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="415" y="292" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="600" y="120" />
+        <di:waypoint x="690" y="120" />
+        <di:waypoint x="690" y="175" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="600" y="280" />
+        <di:waypoint x="690" y="280" />
+        <di:waypoint x="690" y="225" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="690" y="175" />
+        <di:waypoint x="690" y="120" />
+        <di:waypoint x="770" y="120" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="690" y="225" />
+        <di:waypoint x="690" y="280" />
+        <di:waypoint x="770" y="280" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="870" y="120" />
+        <di:waypoint x="960" y="120" />
+        <di:waypoint x="960" y="175" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="870" y="280" />
+        <di:waypoint x="960" y="280" />
+        <di:waypoint x="960" y="225" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="985" y="200" />
+        <di:waypoint x="1042" y="200" />
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>

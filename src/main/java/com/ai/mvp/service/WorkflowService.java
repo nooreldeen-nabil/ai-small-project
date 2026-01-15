@@ -107,7 +107,7 @@ public class WorkflowService {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("documentContent", documentContent);
-            variables.put("title", title);
+            variables.put("documentTitle", title);  // Changed to match BPMN variable name
 
             ProcessInstanceEvent event = zeebeClient.newCreateInstanceCommand()
                     .bpmnProcessId("document-processing")
