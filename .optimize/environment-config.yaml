@@ -1,0 +1,9 @@
+# Optimize environment configuration
+# This file allows for additional Optimize configuration
+# For available settings, see: https://docs.camunda.io/docs/self-managed/optimize-deployment/configuration/
+
+# Example configurations:
+# container:
+#   ports:
+#     https: 8091
+#     http: 8092
