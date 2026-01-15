@@ -1,10 +1,10 @@
 # 🤖 Claude Session Reference Guide
 
 **Project:** LLM Agentic AI MVP - 7-Phase Learning Project
-**Last Updated:** 2026-01-15
-**Current Phase:** Phase 5 (Agentic AI - Tool Use) - COMPLETED ✅ (All 9/9 Tests Passing)
-**Current Branch:** `claude/phase-5-tool-use-unNpt` (Phase 5 feature branch - Ready for Merge)
-**Next Phase:** Phase 6 (Agentic AI - Camunda Workflows)
+**Last Updated:** 2026-01-15 (Session 9)
+**Current Phase:** Phase 6 (Agentic AI - Camunda Workflows) - IN PROGRESS 🚧
+**Current Branch:** `claude/add-camunda-docker-compose-0FXHW` (Phase 6 feature branch)
+**Previous Phase:** Phase 5 (Agentic AI - Tool Use) - COMPLETED ✅ (9/9 Tests Passing)
 
 ---
 
@@ -20,19 +20,25 @@
 | **Phase 4** | ✅ Complete | Jan 13, 2026 | RAG - Document Q&A with Citations |
 | **Phase 5** | ✅ Complete | Jan 14, 2026 | Agentic AI - Tool Use (4 tools + Function Calling) |
 
-### 🚧 Upcoming Phases
+### 🚧 Current Phase
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| **Phase 6** | ⏳ Pending | Agentic AI - Camunda Workflows (BPMN) |
+| **Phase 6** | 🚧 In Progress | Agentic AI - Camunda Workflows (BPMN) - Basic workflow tested ✅ |
+
+### 🔮 Upcoming Phases
+
+| Phase | Status | Description |
+|-------|--------|-------------|
 | **Phase 7** | ⏳ Pending | Integration & Polish (Frontend + Demo) |
 
 ### 🔀 Branch Structure
 
 **Default Branch:** `claude/develop-stable-nSxCU` (stable, production-ready code - Phases 1-4)
 
-**Active Feature Branch:**
-- `claude/phase-5-tool-use-unNpt` - Phase 5 implementation (current)
+**Active Feature Branches:**
+- `claude/add-camunda-docker-compose-0FXHW` - Phase 6 implementation (current) 🚧
+- `claude/phase-5-tool-use-unNpt` - Phase 5 implementation (complete, ready for merge)
 
 **Historical Feature Branches:**
 - `claude/llm-agentic-ai-mvp-bRhG6` - Initial implementation (Phases 1-3 with bugs)
@@ -663,6 +669,53 @@ Similarity Score Range: [0, 1]
   - Test 8 (List Tools): ✅ PASS - Returns 4 tools
   - Test 9 (Health Check): ✅ PASS - Service UP
 - **Phase Status:** ✅ FULLY TESTED AND COMPLETE
+
+### Session 9: Phase 6 Implementation - Camunda Workflows (IN PROGRESS)
+- **Date:** Jan 15, 2026
+- **Branch:** `claude/add-camunda-docker-compose-0FXHW`
+- **Work Done:**
+  - Set up Camunda Platform 8 docker-compose environment
+  - Added Camunda dependencies to pom.xml (spring-boot-starter-camunda-sdk:8.7.8)
+  - Configured Zeebe client in application.yml (self-managed mode)
+  - Created AiAgentWorker - Job worker that executes AI tasks using AgentService from Phase 5
+  - Created WorkflowService - Process lifecycle management (start, query, cancel)
+  - Created WorkflowController - REST API for workflow operations
+  - Created simple-ai-task.bpmn - Basic workflow with AI task service
+  - **Bug Fixes (5 configuration issues resolved):**
+    1. Removed custom ZeebeClientConfiguration (SDK auto-configures)
+    2. Fixed grpc-address to use absolute URI format (http://localhost:26500)
+    3. Added self-managed mode and auth configuration
+    4. Removed explicit zeebe-client-java dependency (version conflict)
+    5. Let SDK manage its own compatible zeebe-client version
+  - **First successful workflow execution!** ✅
+- **Files Created (7 new files):**
+  - docker-compose-camunda.yml - Camunda Platform 8 services
+  - CAMUNDA-SETUP.md - Setup and usage guide
+  - AiAgentWorker.java - ai-task job worker
+  - WorkflowService.java - Process management
+  - WorkflowController.java - REST API endpoints
+  - simple-ai-task.bpmn - Basic AI task workflow
+  - Updated application.yml with Camunda configuration
+- **Files Modified:**
+  - pom.xml - Added Camunda SDK dependencies
+  - .env.template - Added Camunda environment variables
+- **Commits:**
+  - `5b06023` - Fix: Remove custom ZeebeClientConfiguration class
+  - `152ef06` - Fix: Update Camunda Zeebe configuration for SDK compatibility
+  - `41555f4` - Fix: Add self-managed mode and REST address for Camunda SDK
+  - `c570195` - Fix: Simplify Camunda configuration to match working project
+  - `349121e` - Fix: Remove explicit zeebe-client-java dependency to resolve version conflict
+- **Test Results:** ✅ BASIC WORKFLOW WORKING
+  - Test: Simple AI task ("What is the capital of France?")
+  - Result: Process completed successfully
+  - Process Instance Key: 2251799813891193
+  - Workflow visible in Operate UI: http://localhost:8081
+- **Next Steps:**
+  - Create document-processing.bpmn workflow (multi-step with conditional branching)
+  - Create additional job workers (ClassificationWorker, DataExtractionWorker, SaveDocumentWorker, NotificationWorker)
+  - Test complex workflow with high/low confidence paths
+  - Create PHASE-6-GUIDE.md documentation
+- **Phase Status:** 🚧 IN PROGRESS - Basic workflow tested, complex workflows pending
 
 ---
 
