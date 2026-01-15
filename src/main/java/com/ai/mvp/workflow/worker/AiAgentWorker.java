@@ -55,17 +55,24 @@ public class AiAgentWorker {
      *
      * @param job The activated job from Zeebe
      * @param question The user's question or task
-     * @param maxToolCalls Maximum tool calls allowed (optional)
-     * @param temperature LLM temperature (optional)
+     * @param maxToolCalls Maximum tool calls allowed (optional, defaults to 10)
+     * @param temperature LLM temperature (optional, defaults to 0.7)
      * @return Map of process variables to set after job completion
      */
     @JobWorker(type = "ai-task", autoComplete = true)
     public Map<String, Object> handleAiTask(
             final ActivatedJob job,
             @Variable(name = "question") String question,
-            @Variable(name = "maxToolCalls", defaultValue = "10") Integer maxToolCalls,
-            @Variable(name = "temperature", defaultValue = "0.7") Double temperature
+            @Variable(name = "maxToolCalls") Integer maxToolCalls,
+            @Variable(name = "temperature") Double temperature
     ) {
+        // Apply default values for optional parameters
+        if (maxToolCalls == null) {
+            maxToolCalls = 10;
+        }
+        if (temperature == null) {
+            temperature = 0.7;
+        }
         long startTime = System.currentTimeMillis();
 
         log.info("📝 Processing AI task job: {} | Process Instance: {} | Question: {}",
