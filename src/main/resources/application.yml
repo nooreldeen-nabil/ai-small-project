@@ -108,9 +108,15 @@ vector:
 # ============================================================================
 camunda:
   client:
+    # Mode: self-managed (for local docker-compose setup)
+    mode: self-managed
     zeebe:
-      # Zeebe gateway gRPC address (must be absolute URI)
+      # Enable Zeebe client
+      enabled: true
+      # Zeebe gateway gRPC address (must be absolute URI with scheme)
       grpc-address: ${CAMUNDA_ZEEBE_GATEWAY:http://localhost:26500}
+      # Zeebe REST API address
+      rest-address: ${CAMUNDA_ZEEBE_REST:http://localhost:8080}
       # Use plaintext (no TLS) for local development
       use-plaintext-connection: true
       # Worker configuration
