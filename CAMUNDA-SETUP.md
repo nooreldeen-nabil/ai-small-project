@@ -54,7 +54,7 @@ This setup is based on your original Camunda docker-compose with the following m
 ```
 ai-small-project/
 ├── docker-compose-camunda.yml         ⭐ NEW - Camunda services
-├── .env.camunda                       ⭐ NEW - Camunda environment variables
+├── .env                               ⭐ UPDATED - Camunda environment variables
 ├── .web-modeler/                      ⭐ NEW - Web Modeler configuration
 │   └── cluster-config-authentication-mode-none.env
 ├── .optimize/                         ⭐ NEW - Optimize configuration
@@ -62,17 +62,24 @@ ai-small-project/
 ├── connector-secrets.txt              ⭐ NEW - Connector secrets (optional)
 ├── CAMUNDA-SETUP.md                   ⭐ NEW - This file
 │
-├── docker-compose.yml                 (Existing - Oracle 23c for AI app)
-└── .env                               (Existing - AI app environment vars)
+└── docker-compose.yml                 (Future - Oracle 23c for AI app, if needed)
 ```
 
-**Note:** You now have **two separate docker-compose files**:
-1. `docker-compose.yml` - Your AI application with Oracle 23c
-2. `docker-compose-camunda.yml` - Camunda Platform 8 services
+**Note:** The `.env` file contains all Camunda Platform 8 environment variables.
 
 ---
 
 ## 🚀 Quick Start
+
+### 0. Setup Environment (First Time Only)
+
+```bash
+# Copy environment template
+cp .env.template .env
+
+# The .env file already has all Camunda configuration
+# No need to edit unless you want to change versions
+```
 
 ### 1. Start Camunda Platform
 
@@ -206,7 +213,7 @@ This means:
 
 To enable authentication:
 
-1. Edit `.env.camunda`:
+1. Edit `.env`:
    ```env
    ZEEBE_AUTHENTICATION_MODE=identity
    ```
