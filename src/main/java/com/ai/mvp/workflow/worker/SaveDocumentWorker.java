@@ -84,7 +84,7 @@ public class SaveDocumentWorker {
             // 4. Store chunks with vector embeddings for semantic search
             var documentResponse = documentService.uploadDocument(uploadRequest);
 
-            Long documentId = documentResponse.getDocumentId();
+            String documentId = documentResponse.getDocumentId();
 
             log.info("✅ [SaveDocumentWorker] Document saved successfully - ID: {}, Chunks: {}",
                      documentId, documentResponse.getChunksCreated());
@@ -107,7 +107,7 @@ public class SaveDocumentWorker {
             // Return save failure
             long executionTime = System.currentTimeMillis() - startTime;
             Map<String, Object> variables = new HashMap<>();
-            variables.put("documentId", -1L);
+            variables.put("documentId", null);  // No document ID on failure
             variables.put("documentSaved", false);
             variables.put("chunksCreated", 0);
             variables.put("saveError", e.getMessage());

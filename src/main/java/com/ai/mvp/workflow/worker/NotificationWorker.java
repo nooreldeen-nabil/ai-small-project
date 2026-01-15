@@ -48,7 +48,7 @@ public class NotificationWorker {
             @Variable(name = "documentTitle") String documentTitle,
             @Variable(name = "category") String category,
             @Variable(name = "documentSaved") Boolean documentSaved,
-            @Variable(name = "documentId") Long documentId
+            @Variable(name = "documentId") String documentId
     ) {
         long startTime = System.currentTimeMillis();
         log.info("📧 [NotificationWorker] Sending notification for job: {}", job.getKey());
@@ -64,8 +64,8 @@ public class NotificationWorker {
             if (documentSaved == null) {
                 documentSaved = false;
             }
-            if (documentId == null) {
-                documentId = -1L;
+            if (documentId == null || documentId.isBlank()) {
+                documentId = "UNKNOWN";
             }
 
             // Simulate notification sending
@@ -125,13 +125,13 @@ public class NotificationWorker {
      * Builds a notification message based on document processing results.
      */
     private String buildNotificationMessage(
-            String title, String category, boolean saved, Long documentId
+            String title, String category, boolean saved, String documentId
     ) {
-        if (saved && documentId != null && documentId > 0) {
+        if (saved && documentId != null && !documentId.equals("UNKNOWN")) {
             return String.format(
                 "✅ Document '%s' processed successfully!\n" +
                 "Category: %s\n" +
-                "Document ID: %d\n" +
+                "Document ID: %s\n" +
                 "Status: Saved and indexed for semantic search",
                 title, category, documentId
             );

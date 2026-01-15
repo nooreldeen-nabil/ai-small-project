@@ -92,11 +92,11 @@
     <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Classification" targetRef="Gateway_Confidence" />
 
     <bpmn:sequenceFlow id="Flow_HighConfidence" name="confidence >= 0.8" sourceRef="Gateway_Confidence" targetRef="Task_DataExtraction">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=confidence >= 0.8</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=confidence &gt;= 0.8</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
 
-    <bpmn:sequenceFlow id="Flow_LowConfidence" name="confidence < 0.8" sourceRef="Gateway_Confidence" targetRef="Task_ManualReview">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=confidence < 0.8</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_LowConfidence" name="confidence &lt; 0.8" sourceRef="Gateway_Confidence" targetRef="Task_ManualReview">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=confidence &lt; 0.8</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
 
     <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_DataExtraction" targetRef="Gateway_Split" />
