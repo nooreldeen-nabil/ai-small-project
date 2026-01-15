@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Agentic AI MVP - Demo</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header with Navigation -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>🤖 LLM Agentic AI MVP</h1>
+                <div class="status-indicator">
+                    <span id="system-status" class="status-dot"></span>
+                    <span id="system-status-text">Checking...</span>
+                </div>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+                <button class="nav-btn" data-page="chat">Chat</button>
+                <button class="nav-btn" data-page="prompts">Prompts</button>
+                <button class="nav-btn" data-page="documents">Documents</button>
+                <button class="nav-btn" data-page="qa">Q&A</button>
+                <button class="nav-btn" data-page="agent">Agent</button>
+                <button class="nav-btn" data-page="workflow">Workflows</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+            <h2>Dashboard</h2>
+
+            <!-- System Status Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>System Health</h3>
+                    <div id="health-status" class="stat-value">Checking...</div>
+                    <p class="stat-label">Spring Boot + Oracle + Camunda</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Documents Processed</h3>
+                    <div id="document-count" class="stat-value">-</div>
+                    <p class="stat-label">Total documents in vector DB</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Workflows</h3>
+                    <div id="workflow-count" class="stat-value">-</div>
+                    <p class="stat-label">Active processes</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section">
+                <h3>Quick Actions</h3>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="navigateTo('documents')">📄 Upload Document</button>
+                    <button class="btn btn-primary" onclick="navigateTo('qa')">❓ Ask Question</button>
+                    <button class="btn btn-primary" onclick="navigateTo('workflow')">🔄 Start Workflow</button>
+                </div>
+            </div>
+
+            <!-- Features Overview -->
+            <div class="section">
+                <h3>System Capabilities</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h4>💬 Phase 1: LLM Integration</h4>
+                        <p>Multi-provider chat (Gemini, Claude, Ollama)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎯 Phase 2: Prompt Engineering</h4>
+                        <p>Zero-shot, Few-shot, Chain-of-Thought, Structured Output</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔍 Phase 3: Vector Search</h4>
+                        <p>Semantic search with Oracle 23c + embeddings</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📚 Phase 4: RAG (Q&A)</h4>
+                        <p>Document Q&A with citations and confidence scoring</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🛠️ Phase 5: AI Agent</h4>
+                        <p>Tool use with autonomous decision making</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>⚙️ Phase 6: Workflows</h4>
+                        <p>BPMN orchestration with Camunda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Page (Phase 1) -->
+        <div id="chat-page" class="page">
+            <h2>💬 Chat - LLM Integration</h2>
+            <p class="page-description">Direct chat with LLM providers (Phase 1)</p>
+
+            <div class="chat-container">
+                <div class="chat-settings">
+                    <label>
+                        Provider:
+                        <select id="chat-provider">
+                            <option value="GEMINI">Gemini</option>
+                            <option value="CLAUDE">Claude</option>
+                            <option value="OLLAMA">Ollama</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div id="chat-messages" class="chat-messages"></div>
+
+                <div class="chat-input-container">
+                    <textarea id="chat-input" placeholder="Type your message..." rows="3"></textarea>
+                    <button id="chat-send-btn" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prompts Page (Phase 2) -->
+        <div id="prompts-page" class="page">
+            <h2>🎯 Prompt Engineering</h2>
+            <p class="page-description">Demonstrate different prompting techniques (Phase 2)</p>
+
+            <div class="prompt-tabs">
+                <button class="tab-btn active" data-technique="zero-shot">Zero-Shot</button>
+                <button class="tab-btn" data-technique="few-shot">Few-Shot</button>
+                <button class="tab-btn" data-technique="chain-of-thought">Chain-of-Thought</button>
+                <button class="tab-btn" data-technique="structured-output">Structured Output</button>
+            </div>
+
+            <div class="prompt-content">
+                <div class="input-group">
+                    <label>Enter your question:</label>
+                    <textarea id="prompt-input" placeholder="e.g., What is machine learning?" rows="3"></textarea>
+                    <button id="prompt-submit-btn" class="btn btn-primary">Submit</button>
+                </div>
+
+                <div id="prompt-result" class="result-box hidden">
+                    <h3>Response:</h3>
+                    <div id="prompt-response"></div>
+                    <div class="prompt-meta">
+                        <span>Technique: <strong id="prompt-technique-used"></strong></span>
+                        <span>Tokens: <strong id="prompt-tokens"></strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Page (Phase 3) -->
+        <div id="documents-page" class="page">
+            <h2>📄 Document Management</h2>
+            <p class="page-description">Upload documents and perform semantic search (Phase 3)</p>
+
+            <div class="document-section">
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <h3>Upload Document</h3>
+                    <div class="input-group">
+                        <label>Title:</label>
+                        <input type="text" id="doc-title" placeholder="Document Title">
+                    </div>
+                    <div class="input-group">
+                        <label>Category:</label>
+                        <select id="doc-category">
+                            <option value="TECHNICAL">Technical</option>
+                            <option value="BUSINESS">Business</option>
+                            <option value="GENERAL">General</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Content:</label>
+                        <textarea id="doc-content" placeholder="Paste document content here..." rows="8"></textarea>
+                    </div>
+                    <button id="doc-upload-btn" class="btn btn-primary">Upload & Process</button>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <h3>Semantic Search</h3>
+                    <div class="input-group">
+                        <input type="text" id="search-query" placeholder="Search by meaning... e.g., 'how AI learns'">
+                        <button id="search-btn" class="btn btn-primary">Search</button>
+                    </div>
+                    <div id="search-results" class="search-results"></div>
+                </div>
+            </div>
+
+            <!-- Documents List -->
+            <div class="documents-list-section">
+                <h3>All Documents</h3>
+                <div id="documents-list" class="documents-list"></div>
+            </div>
+        </div>
+
+        <!-- Q&A Page (Phase 4) -->
+        <div id="qa-page" class="page">
+            <h2>❓ Document Q&A (RAG)</h2>
+            <p class="page-description">Ask questions about your documents with citations (Phase 4)</p>
+
+            <div class="qa-container">
+                <div class="input-group">
+                    <label>Ask a question:</label>
+                    <textarea id="qa-question" placeholder="e.g., What are the best practices for training neural networks?" rows="3"></textarea>
+                    <button id="qa-submit-btn" class="btn btn-primary">Ask Question</button>
+                </div>
+
+                <div id="qa-result" class="result-box hidden">
+                    <h3>Answer:</h3>
+                    <div id="qa-answer" class="qa-answer"></div>
+
+                    <div class="qa-meta">
+                        <span>Confidence: <strong id="qa-confidence" class="confidence-badge"></strong></span>
+                        <span>Provider: <strong id="qa-provider"></strong></span>
+                        <span>Tokens: <strong id="qa-tokens"></strong></span>
+                    </div>
+
+                    <h3>Sources & Citations:</h3>
+                    <div id="qa-citations" class="citations-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Page (Phase 5) -->
+        <div id="agent-page" class="page">
+            <h2>🛠️ AI Agent Playground</h2>
+            <p class="page-description">Agent with tool use and autonomous decision making (Phase 5)</p>
+
+            <div class="agent-container">
+                <!-- Available Tools -->
+                <div class="agent-tools-section">
+                    <h3>Available Tools</h3>
+                    <div id="agent-tools-list" class="tools-list"></div>
+                </div>
+
+                <!-- Task Input -->
+                <div class="input-group">
+                    <label>Agent Task:</label>
+                    <textarea id="agent-task" placeholder="e.g., Search for technical documents and calculate what percentage they represent of all documents" rows="3"></textarea>
+                    <button id="agent-submit-btn" class="btn btn-primary">Execute Task</button>
+                </div>
+
+                <!-- Execution Log -->
+                <div id="agent-result" class="result-box hidden">
+                    <h3>Execution Log:</h3>
+                    <div id="agent-log" class="agent-log"></div>
+
+                    <h3>Final Answer:</h3>
+                    <div id="agent-answer" class="agent-answer"></div>
+
+                    <div class="agent-meta">
+                        <span>LLM Calls: <strong id="agent-llm-calls"></strong></span>
+                        <span>Tool Calls: <strong id="agent-tool-calls"></strong></span>
+                        <span>Total Tokens: <strong id="agent-tokens"></strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Page (Phase 6) -->
+        <div id="workflow-page" class="page">
+            <h2>⚙️ Workflow Dashboard</h2>
+            <p class="page-description">BPMN workflow orchestration with Camunda (Phase 6)</p>
+
+            <div class="workflow-container">
+                <!-- Start Workflow -->
+                <div class="workflow-start-section">
+                    <h3>Start Document Processing Workflow</h3>
+                    <div class="input-group">
+                        <label>Document Title:</label>
+                        <input type="text" id="workflow-doc-title" placeholder="AI Research Paper">
+                    </div>
+                    <div class="input-group">
+                        <label>Document Content:</label>
+                        <textarea id="workflow-doc-content" placeholder="Enter document content to process..." rows="6"></textarea>
+                    </div>
+                    <button id="workflow-start-btn" class="btn btn-primary">Start Workflow</button>
+                </div>
+
+                <!-- Workflow Status -->
+                <div id="workflow-status" class="workflow-status hidden">
+                    <h3>Workflow Status</h3>
+                    <div class="status-info">
+                        <p><strong>Process ID:</strong> <span id="workflow-process-id"></span></p>
+                        <p><strong>Document ID:</strong> <span id="workflow-document-id"></span></p>
+                        <p><strong>Status:</strong> <span id="workflow-status-text"></span></p>
+                    </div>
+                    <div class="camunda-link">
+                        <a href="http://localhost:8081" target="_blank" class="btn btn-secondary">View in Camunda Operate →</a>
+                    </div>
+                </div>
+
+                <!-- Recent Workflows -->
+                <div class="recent-workflows-section">
+                    <h3>Recent Workflows</h3>
+                    <p class="info-text">View completed workflows in <a href="http://localhost:8081" target="_blank">Camunda Operate</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>LLM Agentic AI MVP - 7-Phase Learning Project | Built with Java 21 + Spring Boot + Oracle 23c + Camunda 8</p>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loading-text">Processing...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/prompts.js"></script>
+    <script src="js/documents.js"></script>
+    <script src="js/qa.js"></script>
+    <script src="js/agent.js"></script>
+    <script src="js/workflow.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
