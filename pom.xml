@@ -39,7 +39,6 @@
 
         <!-- Dependency Versions -->
         <camunda-sdk.version>8.7.8</camunda-sdk.version>
-        <zeebe-client.version>8.7.21</zeebe-client.version>
         <oracle.version>23.6.0.24.10</oracle.version>
         <lombok.version>1.18.30</lombok.version>
         <openapi.version>2.3.0</openapi.version>
@@ -116,14 +115,8 @@
         <!-- Camunda Platform 8 - Phase 6 Integration -->
         <!-- ============================================================ -->
 
-        <!-- Zeebe Client - Connect to Zeebe workflow engine -->
-        <dependency>
-            <groupId>io.camunda</groupId>
-            <artifactId>zeebe-client-java</artifactId>
-            <version>${zeebe-client.version}</version>
-        </dependency>
-
         <!-- Camunda SDK Spring Boot Starter - Job workers and auto-configuration -->
+        <!-- NOTE: This starter includes zeebe-client-java as transitive dependency -->
         <dependency>
             <groupId>io.camunda</groupId>
             <artifactId>spring-boot-starter-camunda-sdk</artifactId>
